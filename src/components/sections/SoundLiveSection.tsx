@@ -15,6 +15,9 @@ import { LIVE_VIDEOS, SOUND_TRAITS } from "@/data/media";
 export function SoundLiveSection() {
   return (
     <SectionCard id="live" zIndex={50}>
+      <p className="mb-5 font-sans text-xl font-bold tracking-tight text-[#FFF3D1] sm:text-2xl">
+        전설적인 라이브를 시청해보세요.
+      </p>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
         {/* Left: Clean Live Video Embed with Tabs & YouTube link ONLY */}
         <Card className="overflow-hidden p-5 sm:p-7 lg:col-span-8">
@@ -73,6 +76,11 @@ export function SoundLiveSection() {
                 <CardDescription className="mt-2 font-sans text-sm leading-relaxed sm:text-base">
                   {trait.description}
                 </CardDescription>
+                {trait.footnote ? (
+                  <p className="mt-3 font-sans text-xs leading-relaxed text-[#7E766E]">
+                    {trait.footnote}
+                  </p>
+                ) : null}
               </CardHeader>
             </Card>
           ))}

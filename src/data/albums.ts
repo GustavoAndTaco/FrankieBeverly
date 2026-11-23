@@ -118,7 +118,7 @@ export const ALBUMS: AlbumItem[] = [
     label: "Capitol Records",
     category: "정규 5집",
     shortDescription:
-      "연대의 메시지를 따뜻한 그루브로 감싼 5집. 제작자가 가장 애정하는 최애곡 수록.",
+      "연대의 메시지를 따뜻한 그루브로 감싼 5집.",
     featuredTrack: "We Are One",
     itunesQuery: "Maze We Are One Frankie Beverly",
     spotifySearchUrl:

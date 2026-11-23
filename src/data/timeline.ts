@@ -24,7 +24,7 @@ export const TIMELINE_MILESTONES: TimelineMilestone[] = [
     era: "1977–1986",
     title: "골든 에라와 라이브 전설",
     summary:
-      "1977년 Capitol 데뷔 후 연속 골드 앨범을 기록했다. Golden Time of Day, 'Before I Let Go'의 Live in New Orleans(1981), We Are One(1983)으로 최전성기를 열었다.",
+      "1977년 Capitol 레코즈 데뷔 후 연속 골드 앨범을 기록했다. Golden Time of Day, 'Before I Let Go'의 Live in New Orleans(1981), We Are One(1983)으로 최전성기를 열었다.",
     albumIdForArt: "live-in-new-orleans",
     photoAlt: "Live in New Orleans 앨범 아트워크",
   },
@@ -33,7 +33,7 @@ export const TIMELINE_MILESTONES: TimelineMilestone[] = [
     era: "1989–1995",
     title: "Warner Bros. 성숙기와 런던 실황",
     summary:
-      "Warner Bros.로 이적해 Silky Soul(1989, 'Can't Get Over You')과 Back to Basics(1993)를 발표했고, 1995년 런던 해머스미스 실황으로 밴드 사운드의 정수를 남겼다.",
+      "Warner Bros.로 이적해 Silky Soul(1989)과 Back to Basics(1993)를 발표했고, 1995년 런던 해머스미스 실황으로 밴드 사운드의 정수를 남겼다.",
     albumIdForArt: "silky-soul",
     photoAlt: "Silky Soul 앨범 아트워크",
   },

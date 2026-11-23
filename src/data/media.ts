@@ -17,6 +17,7 @@ export interface LiveVideoItem {
 export interface SoundTrait {
   title: string;
   description: string;
+  footnote?: string;
 }
 
 /** Verified Wikimedia Commons CC BY 2.0 portrait of Frankie Beverly (used in S4). */
@@ -55,6 +56,8 @@ export const SOUND_TRAITS: SoundTrait[] = [
   {
     title: "콩가 & 그루브",
     description: "넉넉한 콩가 퍼커션과 베이스라인이 만드는 여유로운 리듬.",
+    footnote:
+      "*콩가(Conga)는 쿠바에서 유래한 길쭉한 통 모양의 타악기이며, '콩가 퍼커션'은 이 악기로 만들어내는 리듬 연주 전반을 뜻합니다.",
   },
   {
     title: "콜 앤 리스폰스",
