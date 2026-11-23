@@ -64,6 +64,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .monoton-regular {
   font-family: var(--font-monoton), sans-serif;
   font-weight: 400;

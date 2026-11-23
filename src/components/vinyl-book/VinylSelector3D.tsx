@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   AnimatePresence,
@@ -135,6 +135,17 @@ export function VinylSelector3D() {
   const [selectedIndex, setSelectedIndex] = useState<number>(7);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
+  const rackScrollRef = useRef<HTMLDivElement>(null);
+  const sleeveRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const hasMountedRef = useRef(false);
+  const showcaseTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const dragStateRef = useRef({
+    isDown: false,
+    startX: 0,
+    startScrollLeft: 0,
+    moved: false,
+  });
+
   const selectedAlbum = ALBUMS[selectedIndex];
   const selectedArtwork = mediaMap[selectedAlbum.id]?.artworkUrl ?? null;
   const isCurrentPlaying = currentAlbumId === selectedAlbum.id && isPlaying;
@@ -148,6 +159,19 @@ export function VinylSelector3D() {
       }
     });
   }, [mediaMap]);
+
+  useEffect(() => {
+    const container = rackScrollRef.current;
+    const sleeve = sleeveRefs.current[selectedIndex];
+    if (!container || !sleeve) return;
+    const targetLeft =
+      sleeve.offsetLeft - (container.clientWidth - sleeve.offsetWidth) / 2;
+    container.scrollTo({
+      left: Math.max(0, targetLeft),
+      behavior: hasMountedRef.current ? "smooth" : "auto",
+    });
+    hasMountedRef.current = true;
+  }, [selectedIndex]);
 
   const handleSelectAlbum = useCallback(
     (idx: number) => {
@@ -169,6 +193,56 @@ export function VinylSelector3D() {
     }
   };
 
+  const handleShowcaseTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    showcaseTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleShowcaseTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const start = showcaseTouchStartRef.current;
+    showcaseTouchStartRef.current = null;
+    const touch = e.changedTouches[0];
+    if (!start || !touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      if (dx < 0) {
+        setSelectedIndex((prev) => Math.min(ALBUMS.length - 1, prev + 1));
+      } else {
+        setSelectedIndex((prev) => Math.max(0, prev - 1));
+      }
+    }
+  };
+
+  const handleRackPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    const container = rackScrollRef.current;
+    if (!container) return;
+    dragStateRef.current = {
+      isDown: true,
+      startX: e.clientX,
+      startScrollLeft: container.scrollLeft,
+      moved: false,
+    };
+  };
+
+  const handleRackPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragStateRef.current;
+    if (!drag.isDown || e.pointerType !== "mouse") return;
+    const container = rackScrollRef.current;
+    if (!container) return;
+    const dx = e.clientX - drag.startX;
+    if (Math.abs(dx) > 6) {
+      drag.moved = true;
+    }
+    container.scrollLeft = drag.startScrollLeft - dx;
+  };
+
+  const handleRackPointerUp = () => {
+    dragStateRef.current.isDown = false;
+  };
+
   const floatOnLeftSide = selectedIndex >= 6;
 
   return (
@@ -179,7 +253,11 @@ export function VinylSelector3D() {
       className="relative flex min-h-[78vh] w-full flex-col justify-between outline-none"
     >
       {/* Upper Showcase Stage: Rising 3D LP + Floating Mid-Air Description */}
-      <div className="relative flex min-h-[320px] w-full items-center justify-center sm:min-h-[360px]">
+      <div
+        onTouchStart={handleShowcaseTouchStart}
+        onTouchEnd={handleShowcaseTouchEnd}
+        className="relative flex min-h-[320px] w-full touch-pan-y items-center justify-center sm:min-h-[360px]"
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedAlbum.id}
@@ -299,85 +377,115 @@ export function VinylSelector3D() {
 
       {/* Bottom 9 Angled 3D Vinyl Sleeves Rack */}
       <div className="mt-8 w-full">
-        <div
-          onMouseLeave={() => setHoveredIndex(null)}
-          style={{ perspective: "1500px" }}
-          className="flex items-end justify-start overflow-x-auto px-4 pt-12 pb-6 sm:justify-center sm:overflow-visible"
-        >
-          <div className="flex items-end">
-            {ALBUMS.map((album, idx) => {
-              const artworkUrl = mediaMap[album.id]?.artworkUrl ?? null;
-              const isSelected = idx === selectedIndex;
-              const isHovered = idx === hoveredIndex;
+        <div className="relative">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-0 z-40 w-8 bg-gradient-to-r from-[#110E0C] to-transparent xl:hidden"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 z-40 w-8 bg-gradient-to-l from-[#110E0C] to-transparent xl:hidden"
+          />
 
-              const focusIdx = hoveredIndex ?? selectedIndex;
-              const delta = idx - focusIdx;
-              const spreadX = delta === 0 ? 0 : delta < 0 ? -14 : 18;
-              const rotateY = isSelected ? -8 : isHovered ? -14 : -34;
-              const liftY = isSelected ? -34 : isHovered ? -18 : 0;
+          <div
+            ref={rackScrollRef}
+            onMouseLeave={() => {
+              setHoveredIndex(null);
+              handleRackPointerUp();
+            }}
+            onPointerDown={handleRackPointerDown}
+            onPointerMove={handleRackPointerMove}
+            onPointerUp={handleRackPointerUp}
+            onPointerCancel={handleRackPointerUp}
+            style={{ perspective: "1500px", WebkitOverflowScrolling: "touch" }}
+            className="no-scrollbar flex items-end overflow-x-auto overscroll-x-contain pt-16 pb-8 select-none xl:overflow-visible"
+          >
+            <div className="mx-auto flex w-max items-end px-8 sm:px-10">
+              {ALBUMS.map((album, idx) => {
+                const artworkUrl = mediaMap[album.id]?.artworkUrl ?? null;
+                const isSelected = idx === selectedIndex;
+                const isHovered = idx === hoveredIndex;
 
-              return (
-                <motion.button
-                  key={album.id}
-                  type="button"
-                  onMouseEnter={() => setHoveredIndex(idx)}
-                  onClick={() => handleSelectAlbum(idx)}
-                  aria-label={`${album.title} (${album.year}) 선택 및 재생`}
-                  aria-pressed={isSelected}
-                  initial={false}
-                  animate={{
-                    y: liftY,
-                    x: spreadX,
-                    rotateY,
-                    scale: isSelected ? 1.12 : isHovered ? 1.05 : 1,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 260,
-                    damping: 22,
-                  }}
-                  style={{
-                    transformStyle: "preserve-3d",
-                    zIndex: isSelected ? 30 : isHovered ? 20 : 10 + idx,
-                  }}
-                  className={cn(
-                    "relative -ml-7 aspect-square w-[112px] shrink-0 cursor-pointer overflow-hidden rounded-xl border bg-[#1A1512] shadow-[-10px_14px_28px_rgba(0,0,0,0.72)] transition-shadow first:ml-0 sm:-ml-9 sm:w-[138px] lg:-ml-10 lg:w-[156px]",
-                    isSelected
-                      ? "border-[#F4B942]/80 ring-2 ring-[#E07A2F]/45 shadow-[0_22px_45px_rgba(224,122,47,0.3)]"
-                      : "border-white/15 hover:border-white/40",
-                  )}
-                >
-                  {artworkUrl ? (
-                    <Image
-                      src={artworkUrl}
-                      alt={album.title}
-                      fill
-                      sizes="160px"
-                      className="object-cover"
-                    />
-                  ) : (
+                const focusIdx = hoveredIndex ?? selectedIndex;
+                const delta = idx - focusIdx;
+                const spreadX = delta === 0 ? 0 : delta < 0 ? -14 : 18;
+                const rotateY = isSelected ? -8 : isHovered ? -14 : -34;
+                const liftY = isSelected ? -34 : isHovered ? -18 : 0;
+
+                return (
+                  <motion.button
+                    key={album.id}
+                    ref={(el) => {
+                      sleeveRefs.current[idx] = el;
+                    }}
+                    type="button"
+                    draggable={false}
+                    onMouseEnter={() => setHoveredIndex(idx)}
+                    onClick={() => {
+                      if (dragStateRef.current.moved) {
+                        dragStateRef.current.moved = false;
+                        return;
+                      }
+                      handleSelectAlbum(idx);
+                    }}
+                    aria-label={`${album.title} (${album.year}) 선택 및 재생`}
+                    aria-pressed={isSelected}
+                    initial={false}
+                    animate={{
+                      y: liftY,
+                      x: spreadX,
+                      rotateY,
+                      scale: isSelected ? 1.12 : isHovered ? 1.05 : 1,
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 22,
+                    }}
+                    style={{
+                      transformStyle: "preserve-3d",
+                      zIndex: isSelected ? 30 : isHovered ? 20 : 10 + idx,
+                    }}
+                    className={cn(
+                      "relative -ml-7 aspect-square w-[112px] shrink-0 cursor-pointer overflow-hidden rounded-xl border bg-[#1A1512] shadow-[-10px_14px_28px_rgba(0,0,0,0.72)] transition-shadow first:ml-0 sm:-ml-9 sm:w-[138px] lg:-ml-10 lg:w-[156px]",
+                      isSelected
+                        ? "border-[#F4B942]/80 ring-2 ring-[#E07A2F]/45 shadow-[0_22px_45px_rgba(224,122,47,0.3)]"
+                        : "border-white/15 hover:border-white/40",
+                    )}
+                  >
+                    {artworkUrl ? (
+                      <Image
+                        src={artworkUrl}
+                        alt={album.title}
+                        fill
+                        sizes="160px"
+                        draggable={false}
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="flex size-full flex-col justify-between p-3 text-left"
+                        style={{
+                          background: `linear-gradient(150deg, #251D19 0%, ${album.vinylLabelColor}55 100%)`,
+                        }}
+                      >
+                        <span className="font-display text-xs tracking-wider text-[#FFF3D1]/70">
+                          {album.year}
+                        </span>
+                        <span className="line-clamp-2 font-display text-base leading-tight text-[#FFF3D1]">
+                          {album.title}
+                        </span>
+                      </div>
+                    )}
+
                     <div
-                      className="flex size-full flex-col justify-between p-3 text-left"
-                      style={{
-                        background: `linear-gradient(150deg, #251D19 0%, ${album.vinylLabelColor}55 100%)`,
-                      }}
-                    >
-                      <span className="font-display text-xs tracking-wider text-[#FFF3D1]/70">
-                        {album.year}
-                      </span>
-                      <span className="line-clamp-2 font-display text-base leading-tight text-[#FFF3D1]">
-                        {album.title}
-                      </span>
-                    </div>
-                  )}
-
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-white/15"
-                  />
-                </motion.button>
-              );
-            })}
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-white/15"
+                    />
+                  </motion.button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
