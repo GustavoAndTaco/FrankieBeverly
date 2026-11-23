@@ -139,6 +139,7 @@ body {
 
 .animate-vinyl-spin {
   animation: vinyl-spin 3.8s linear infinite;
+  will-change: transform;
 }
 
 .animate-vinyl-spin-paused {
@@ -201,7 +202,6 @@ input[type="range"].volume-slider::-moz-range-thumb {
     scroll-behavior: auto;
   }
 
-  .animate-vinyl-spin,
   .animate-float-gentle {
     animation: none;
   }

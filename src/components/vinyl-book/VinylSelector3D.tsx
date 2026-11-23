@@ -43,10 +43,9 @@ function VinylDisc3D({
         tiltY.set(0);
       }}
       style={{
-        perspective: "900px",
+        transformPerspective: 900,
         rotateX,
         rotateY,
-        transformStyle: "preserve-3d",
       }}
       className="relative size-[190px] sm:size-[225px] lg:size-[245px]"
     >
@@ -64,12 +63,11 @@ function VinylDisc3D({
       {/* Main Spinning Vinyl Platter */}
       <div
         className={cn(
-          "relative size-full rounded-full border shadow-[0_24px_50px_rgba(0,0,0,0.85),inset_0_1px_4px_rgba(255,255,255,0.24)] transition-colors duration-300",
-          isPlaying
-            ? "animate-vinyl-spin border-[#F4B942]/45"
-            : "animate-vinyl-spin-paused border-white/20",
+          "animate-vinyl-spin relative size-full rounded-full border shadow-[0_24px_50px_rgba(0,0,0,0.85),inset_0_1px_4px_rgba(255,255,255,0.24)] transition-colors duration-300",
+          isPlaying ? "border-[#F4B942]/45" : "border-white/20",
         )}
         style={{
+          animationPlayState: isPlaying ? "running" : "paused",
           background:
             "repeating-radial-gradient(circle, #191513 0px, #191513 2.5px, #0C0A09 3.5px, #0C0A09 6px)",
         }}

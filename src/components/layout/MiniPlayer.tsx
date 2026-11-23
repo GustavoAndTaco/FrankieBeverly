@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { ALBUMS } from "@/data/albums";
-import { cn } from "@/lib/utils";
 
 function formatTime(seconds: number): string {
   const safe = Math.max(0, Math.floor(seconds));
@@ -70,12 +69,10 @@ export function MiniPlayer() {
               {/* Spinning mini vinyl disc */}
               <div className="relative size-11 shrink-0">
                 <div
-                  className={cn(
-                    "relative size-11 overflow-hidden rounded-full border border-white/15 bg-[#120E0C] shadow-inner",
-                    isPlaying
-                      ? "animate-vinyl-spin"
-                      : "animate-vinyl-spin-paused",
-                  )}
+                  className="animate-vinyl-spin relative size-11 overflow-hidden rounded-full border border-white/15 bg-[#120E0C] shadow-inner"
+                  style={{
+                    animationPlayState: isPlaying ? "running" : "paused",
+                  }}
                 >
                   {activeMedia?.artworkUrl ? (
                     <Image
