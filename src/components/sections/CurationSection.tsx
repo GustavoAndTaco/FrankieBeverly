@@ -16,7 +16,7 @@ import { ALBUMS } from "@/data/albums";
 import { CURATION_PICKS, CURATOR_ESSAY } from "@/data/curation";
 import { cn } from "@/lib/utils";
 
-/** Section 4 (RECOMMENDS): Full-canvas curator card + large 2x2 track picks with zero section headers. */
+/** Section 4 (RECOMMENDS): Full-canvas curator card + large 2x2 track picks (Bebas Neue + NanumSquare). */
 export function CurationSection() {
   const { currentAlbumId, isPlaying, playAlbum } = useAudioPlayer();
 
@@ -26,9 +26,9 @@ export function CurationSection() {
       <Card className="mb-4 p-2 lg:mb-5">
         <CardHeader className="p-6 sm:p-8">
           <CardTitle className="font-sans text-2xl font-extrabold text-[#FFF3D1] sm:text-3xl">
-            &ldquo;{CURATOR_ESSAY.heading}&rdquo;
+            {CURATOR_ESSAY.heading}
           </CardTitle>
-          <CardDescription className="mt-2 max-w-[920px] text-base leading-relaxed text-foreground/88 sm:text-lg">
+          <CardDescription className="mt-2 max-w-[920px] font-sans text-base leading-relaxed text-foreground/88 sm:text-lg">
             {CURATOR_ESSAY.body}
           </CardDescription>
         </CardHeader>
@@ -55,11 +55,11 @@ export function CurationSection() {
                   <div className="min-w-0">
                     <Badge
                       variant={pick.isTopFavorite ? "sunset" : "secondary"}
-                      className="mb-2.5 text-[11px]"
+                      className="mb-2.5 font-display text-xs tracking-[0.1em]"
                     >
                       {pick.pickLabel}
                     </Badge>
-                    <CardTitle className="font-serif text-2xl font-bold sm:text-3xl">
+                    <CardTitle className="font-display text-3xl tracking-[0.04em] sm:text-4xl">
                       {pick.trackTitle}
                     </CardTitle>
                     <p className="mt-1 font-mono text-xs text-muted-foreground">
@@ -89,12 +89,12 @@ export function CurationSection() {
               </CardHeader>
 
               <CardContent className="p-6 pt-1 sm:p-7 sm:pt-1">
-                <p className="text-base leading-relaxed text-muted-foreground">
+                <p className="font-sans text-base leading-relaxed text-muted-foreground">
                   {pick.note}
                 </p>
 
                 {album ? (
-                  <div className="mt-4 flex items-center gap-4 font-mono text-xs text-muted-foreground">
+                  <div className="mt-4 flex items-center gap-4 font-display text-sm tracking-[0.08em] text-muted-foreground">
                     <a
                       href={album.spotifySearchUrl}
                       target="_blank"

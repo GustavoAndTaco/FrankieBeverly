@@ -10,8 +10,8 @@ export interface CurationPick {
 
 /** Personal curator liner note essay (RECOMMENDS section). */
 export const CURATOR_ESSAY = {
-  heading: "내가 거의 매일 Maze를 듣게 된 이유",
-  body: "화려한 기교보다 진심을 얹어 부르는 프랭키 베벌리의 목소리와 느긋한 그루브는, 하루의 끝에 해가 지는 노을처럼 가장 오래 곁에 남아 마음을 다독여 줍니다.",
+  heading: "Maze와 Frankie Beverly에게 빠지게 된 이유",
+  body: "화려한 기교보다 진심을 얹어 부르는 프랭키 베벌리의 소울감 충만한 목소리와 느긋한 그루브에 빠지지 않고는 배길 수 없었다.",
 };
 
 /** 4 personal track picks shown in the 2x2 Bento grid. */
@@ -31,7 +31,7 @@ export const CURATION_PICKS: CurationPick[] = [
     trackTitle: "We Are One",
     albumTitle: "We Are One",
     approxYear: "1983년경",
-    note: "단순하고 따뜻한 연대의 메시지가 묵직한 그루브와 만나 혼자 듣다가도 깊은 온기를 건네는 곡.",
+    note: "인트로에서부터 바로 감기는 Maze에 결정적으로 입문하게 된 곡",
     isTopFavorite: true,
   },
   {
@@ -40,7 +40,7 @@ export const CURATION_PICKS: CurationPick[] = [
     trackTitle: "Before I Let Go",
     albumTitle: "Live in New Orleans",
     approxYear: "1981년경",
-    note: "Maze의 라이브가 왜 전설로 불리는지 단번에 체감하게 만드는 시그니처 입문 트랙.",
+    note: "Maze의 라이브가 왜 전설로 불리는지 단번에 체감하게 만드는 시그니처 트랙.",
   },
   {
     pickLabel: "MOOD PICK 04",

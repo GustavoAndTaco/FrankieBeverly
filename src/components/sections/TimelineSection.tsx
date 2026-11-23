@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Disc3 } from "lucide-react";
 import { SectionCard } from "@/components/motion/SectionCard";
@@ -9,132 +10,101 @@ import {
   TIMELINE_MILESTONES,
   type TimelineMilestone,
 } from "@/data/timeline";
+import { cn } from "@/lib/utils";
 
-function MilestoneVisual({
+function MilestoneBackdropPhoto({
   milestone,
-  artworkUrl,
+  src,
 }: {
   milestone: TimelineMilestone;
-  artworkUrl: string | null;
+  src: string | null;
 }) {
-  if (milestone.visualVariant === "origins") {
-    return (
-      <div className="relative h-28 w-48 overflow-hidden rounded-xl border border-white/12 bg-[#120E0C] p-3.5 shadow-xl rotate-[-2deg] transition-transform duration-300 group-hover:rotate-0 sm:h-32 sm:w-52">
-        <div className="flex items-center justify-between font-mono text-[11px] font-medium text-[#F4B942]">
-          <span>PHL 1963</span>
-          <span>→</span>
-          <span>SF 1976</span>
-        </div>
-        <div className="mt-3 space-y-2">
-          <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-xs text-foreground/85">
-            <span className="font-bold">The Butlers</span>
-            <span className="font-mono text-[10px] text-muted-foreground">60s</span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border border-[#E07A2F]/40 bg-[#E07A2F]/15 px-2.5 py-1.5 text-xs font-bold text-[#FFF3D1]">
-            <span>Raw Soul → Maze</span>
-            <span className="font-mono text-[10px] text-[#F4B942]">76</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const [failed, setFailed] = useState(false);
 
-  if (milestone.visualVariant === "golden" || milestone.visualVariant === "warner") {
-    const fallbackLabel =
-      milestone.visualVariant === "golden"
-        ? "Live in New Orleans"
-        : "Silky Soul";
-    return (
-      <div className="relative flex h-28 w-48 items-end justify-between overflow-hidden rounded-xl border border-white/12 bg-[#120E0C] p-3 shadow-xl rotate-[2deg] transition-transform duration-300 group-hover:rotate-0 sm:h-32 sm:w-52">
-        {/* Vinyl peeking behind sleeve */}
-        <div
-          aria-hidden="true"
-          className="absolute -top-5 right-3 size-28 rounded-full border border-white/15 bg-[repeating-radial-gradient(circle,#171412_0px,#171412_3px,#0D0B0A_4px,#0D0B0A_5px)]"
-        >
-          <span className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#E07A2F]" />
-        </div>
-
-        <div className="relative z-10 size-20 overflow-hidden rounded-lg border border-white/15 bg-[#1D1714] shadow-md sm:size-24">
-          {artworkUrl ? (
-            <Image
-              src={artworkUrl}
-              alt={fallbackLabel}
-              fill
-              sizes="96px"
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex size-full flex-col items-center justify-center p-2 text-center">
-              <Disc3 className="size-6 text-[#F4B942]" />
-              <span className="mt-1 font-serif text-xs leading-tight text-foreground">
-                {fallbackLabel}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <span className="relative z-10 font-mono text-[10px] text-muted-foreground">
-          {milestone.visualVariant === "golden" ? "Capitol" : "Warner"}
-        </span>
-      </div>
-    );
-  }
-
-  // Legacy card (S4)
   return (
-    <div className="relative flex h-28 w-48 flex-col justify-between overflow-hidden rounded-xl border border-[#FAF8F5]/30 bg-[#FAF8F5] p-3.5 text-[#181310] shadow-xl rotate-[-1.5deg] transition-transform duration-300 group-hover:rotate-0 sm:h-32 sm:w-52">
-      <div className="flex items-center justify-between font-mono text-[10px] font-semibold tracking-wider text-[#8C6A4A]">
-        <span>ALL-WHITE LEGACY</span>
-        <span>1946–2024</span>
-      </div>
-      <div>
-        <p className="font-serif text-lg font-bold leading-tight text-[#181310] sm:text-xl">
-          I Wanna Thank You
-        </p>
-        <p className="mt-0.5 text-[11px] font-medium text-[#6E6257]">
-          Forever Frankie Beverly
-        </p>
-      </div>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 right-0 w-[68%] overflow-hidden sm:w-[60%]"
+    >
+      {src && !failed ? (
+        <Image
+          src={src}
+          alt={milestone.photoAlt ?? milestone.title}
+          fill
+          sizes="(max-width: 768px) 80vw, 480px"
+          onError={() => setFailed(true)}
+          className={cn(
+            "object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]",
+            milestone.id === "S4"
+              ? "object-top grayscale-[18%] contrast-[1.06] opacity-70 group-hover:opacity-85"
+              : milestone.id === "S1"
+                ? "object-center grayscale-[20%] contrast-[1.08] opacity-75 group-hover:opacity-90"
+                : "object-center opacity-55 contrast-[1.05] group-hover:opacity-75",
+          )}
+        />
+      ) : (
+        <div className="flex size-full items-center justify-end pr-8 opacity-20">
+          <Disc3 className="size-36 text-[#F4B942]" />
+        </div>
+      )}
+
+      {/* Multi-directional dark fade so left text stays crisp & borders vanish seamlessly */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, #181412 0%, rgba(24,20,18,0.92) 22%, rgba(24,20,18,0.42) 62%, rgba(24,20,18,0.18) 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(24,20,18,0.55) 0%, transparent 25%, transparent 70%, rgba(24,20,18,0.75) 100%)",
+        }}
+      />
     </div>
   );
 }
 
-/** Section 2 (ABOUT MAZE): Full-canvas 2x2 Bento Timeline with zero cluttered headers. */
+/** Section 2 (ABOUT MAZE): Enlarged 2x2 Bento Timeline with A-style integrated era photos. */
 export function TimelineSection() {
   const { mediaMap } = useAudioPlayer();
 
   return (
-    <SectionCard id="about-maze" zIndex={20}>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5">
+    <SectionCard id="about-maze" zIndex={20} innerClassName="py-16 lg:py-20">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {TIMELINE_MILESTONES.map((milestone) => {
-          const artworkUrl = milestone.albumIdForArt
-            ? (mediaMap[milestone.albumIdForArt]?.artworkUrl ?? null)
-            : null;
+          const resolvedSrc =
+            milestone.photoSrc ??
+            (milestone.albumIdForArt
+              ? (mediaMap[milestone.albumIdForArt]?.artworkUrl ?? null)
+              : null);
 
           return (
             <Card
               key={milestone.id}
-              className="group relative min-h-[275px] justify-between overflow-hidden p-7 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 sm:p-9 lg:min-h-[330px]"
+              className="group relative min-h-[340px] justify-between overflow-hidden p-7 transition-all duration-300 hover:-translate-y-1 hover:border-white/25 sm:min-h-[390px] sm:p-9 lg:min-h-[430px] lg:p-10"
             >
-              <div>
-                <span className="font-mono text-xs font-medium tracking-widest text-[#F4B942]">
-                  {milestone.era}
-                </span>
+              <MilestoneBackdropPhoto
+                milestone={milestone}
+                src={resolvedSrc}
+              />
 
-                <h2 className="mt-2.5 font-sans text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl lg:text-[32px]">
-                  {milestone.title}
-                </h2>
+              <div className="relative z-10 flex h-full max-w-[66%] flex-col justify-between sm:max-w-[60%]">
+                <div>
+                  <span className="font-display text-xl tracking-[0.14em] text-[#F4B942] sm:text-2xl">
+                    {milestone.era}
+                  </span>
 
-                <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-[17px]">
+                  <h2 className="mt-2 font-sans text-2xl font-extrabold tracking-tight text-[#FFF3D1] sm:text-3xl lg:text-[34px]">
+                    {milestone.title}
+                  </h2>
+                </div>
+
+                <p className="mt-6 font-sans text-base leading-relaxed text-foreground/88 drop-shadow-[0_2px_10px_rgba(17,14,12,0.9)] sm:text-[17px]">
                   {milestone.summary}
                 </p>
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <MilestoneVisual
-                  milestone={milestone}
-                  artworkUrl={artworkUrl}
-                />
               </div>
             </Card>
           );

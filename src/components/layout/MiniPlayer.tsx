@@ -63,7 +63,7 @@ export function MiniPlayer() {
           exit={{ y: 80, opacity: 0 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
           aria-label="하단 미니 바이닐 플레이어"
-          className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-[780px] -translate-x-1/2 lg:left-[calc(50%+110px)] lg:w-[calc(100%-290px)]"
+          className="fixed bottom-4 left-1/2 z-[90] w-[calc(100%-1.5rem)] max-w-[780px] -translate-x-1/2 lg:left-[calc(50%+150px)] lg:w-[calc(100%-340px)]"
         >
           <div className="rounded-2xl border border-white/12 bg-[#161210]/95 px-4 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.75)] backdrop-blur-lg">
             <div className="flex items-center gap-3.5">

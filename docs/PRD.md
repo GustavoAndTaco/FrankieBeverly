@@ -11,7 +11,7 @@
 | **프로젝트명** | `FrankieBeverly` |
 | **과제 정보** | 멀티미디어 콘텐츠 제작 텀 프로젝트 |
 | **작성자** | 20231044 박해신 |
-| **문서 버전** | v2.0 (2026-11-24 6섹션 카드 커튼 · 좌측 롤링 메뉴 · 3D 바이닐 셀렉터 · 나눔스퀘어 개편 완료) |
+| **문서 버전** | v2.1 (2026-11-24 사진 보정·통합, Bebas Neue 영문 폰트, 좌측 메뉴 50% 확대, LP 센터 커버 회전 반영) |
 | **GitHub 저장소** | https://github.com/GustavoAndTaco/FrankieBeverly (Public) |
 | **배포 목표** | Vercel 무료 웹 호스팅 (과제 제출용 라이브 URL 확보 및 시연) |
 | **기술 스택** | Next.js `16.4.6` (App Router, `src/`), React `19.3.0`, TypeScript, Tailwind CSS `4.3.3`, **shadcn/ui** |
@@ -34,11 +34,11 @@
 ## 3. 전체 UX 구조 & 네비게이션 (Information Architecture)
 
 ### 3.1 탐색 패턴: 스택 카드 커튼 스크롤 (Stacked Card Curtain Scrollytelling)
-- **흐름**: `INTRO`부터 `OUTRO`까지 **총 6개 섹션**(기존 ② Identity 제거)이 화면을 가득 채우는 카드로 쌓여 있으며, 다음 섹션으로 이동할 때 다음 카드가 앞선 카드를 선셋 그라데이션 커튼으로 부드럽게 덮으며 올라온다(GSAP `ScrollTrigger`).
-- **좌측 고정 롤링 내비게이션 (`LeftRadialMenu`)**:
-  - 상단 가로 바를 제거하고, `메뉴 선택 모션.json`의 곡선 롤링 다이얼과 선셋 점(`#FDF6C8` → `#FEA864` → `#FF5900`) 모션을 구현한 내비게이션이 **화면 왼쪽에 항상 고정**된다.
-  - 6개 대문자 메뉴: **`INTRO`** · **`ABOUT MAZE`** · **`DISCOGRAPHY`** · **`RECOMMENDS`** · **`LIVE`** · **`OUTRO`**
-  - 본문 컨테이너는 데스크톱 기준 좌측 안전 여백(`lg:pl-[255px]`)을 확보해 좌측 메뉴와 절대 겹치지 않으며 화면을 꽉 채워 가독성을 극대화한다.
+- **흐름**: `INTRO`부터 `OUTRO`까지 **총 6개 섹션**이 화면을 가득 채우는 카드로 쌓여 있으며, 섹션 사이에 충분한 스크롤 간격(`36vh` 여유 스페이서)을 두어 다음 섹션이 일찍 현재 정보를 가리지 않으면서 선셋 그라데이션 커튼으로 자연스럽게 덮고 올라온다(GSAP `ScrollTrigger` + 키 큰 카드 동적 sticky 오프셋).
+- **좌측 고정 롤링 내비게이션 (`LeftRadialMenu`, `z-[90]`)**:
+  - 기존보다 **50% 확대된** 곡선 롤링 다이얼과 선셋 점(`#FDF6C8` → `#FEA864` → `#FF5900`)이 `z-[90]` 레이어로 **화면 왼쪽에 항상 최상위로 고정**된다(`LIVE`·`OUTRO` 포함 전 섹션 유지).
+  - 6개 대문자 메뉴 (`Bebas Neue`): **`INTRO`** · **`ABOUT MAZE`** · **`DISCOGRAPHY`** · **`RECOMMENDS`** · **`LIVE`** · **`OUTRO`**
+  - 본문 컨테이너는 데스크톱 기준 좌측 안전 여백(`lg:pl-[315px] xl:pl-[345px]`)을 확보해 확대된 좌측 메뉴와 절대 겹치지 않는다.
 - **글로벌 하단 플로팅 미니 플레이어**:
   - 곡 재생 시 화면 하단에 미니 플레이어가 유지된다.
   - 표시 요소: 회전 미니 바이닐 썸네일, 곡명 · 대략적 발매 시기, 재생/일시정지, 30초 진행 바, **음량 조절 슬라이더(Mute 포함)**, 닫기 컨트롤.
@@ -108,19 +108,19 @@
   ```
 - **Next.js 16 구현 방식**: Next.js App Router 프로덕션 최적화(외부 네트워크 요청 제거 및 자동 셀프 호스팅, CLS 방지)를 위해 `src/app/layout.tsx`에서 `next/font/google`의 `Monoton`을 불러와 CSS 변수(`--font-monoton`)로 연결하고 `.monoton-regular` 유틸리티와 동일하게 적용한다.
 
-#### ② 에디토리얼 헤딩 & 본문 폰트 (`NanumSquare`)
-- **영문 세리프 헤딩 · 연도 · 인용구**: `Cormorant Garamond` (`next/font/google`)
-- **한국어 본문 · 포인트 헤딩 · 메뉴**: 로컬 **`나눔스퀘어(NanumSquare)`** OTF (`300 / 400 / 700 / 800`, `next/font/local`)를 적용하고, 섹션 타이틀·강조 문구에 **NanumSquare Bold/ExtraBold**를 사용해 시원한 가독성을 확보한다.
+#### ② 영문 디스플레이 & 한국어 본문 폰트 (`Bebas Neue` + `NanumSquare`)
+- **영문 디스플레이 · 타이틀 · 메뉴 · 트랙명**: **`Bebas Neue`** (`next/font/google`, `weight: 400`)
+- **한국어 본문 · 포인트 헤딩**: 로컬 **`나눔스퀘어(NanumSquare)`** OTF (`300 / 400 / 700 / 800`, `next/font/local`)를 적용하고, 강조 문구에 **NanumSquare Bold/ExtraBold**를 사용해 시원한 가독성을 확보한다.
 
 ---
 
-## 5. 전체 6개 섹션 상세 명세 (v2.0 확정)
+## 5. 전체 6개 섹션 상세 명세 (v2.1 확정)
 
 *(※ 좌측에 고정된 `LeftRadialMenu`가 섹션 전환을 명확히 안내하므로, 각 섹션 내부의 불필요한 번호·제목·짜잘한 부제와 장황한 설명은 전부 제거하고 콘텐츠 박스 자체의 크기와 가독성을 화면에 맞게 극대화한다.)*
 
 1. **`INTRO` (`IntroSection.tsx`)**: 어두운 화면 정중앙(좌측 메뉴 여백 제외 영역)에 기존 대비 **약 150% 확대된** `Monoton` 선셋 그라데이션 로고(`MAZE ft` / `FRANKIE BEVERLY`)와 마우스 3D 패럴랙스 단독 구성.
-2. **`ABOUT MAZE` (`TimelineSection.tsx`)**: 기존 Identity 섹션을 통합/제거하고, 화면을 크게 채우는 `2×2` 대형 벤토 카드(`S1` 1960s–1976 → `S2` 1977–1986 → `S3` 1989–1995 → `S4` 2000s–2024+)와 NanumSquare Bold 제목, 핵심 요약만 깔끔하게 배치.
-3. **`DISCOGRAPHY` (`DiscographySection.tsx` + `VinylSelector3D.tsx`)**: `vinyl-selector.riv` 감성의 **마우스 반응형 9장 3D 비스듬한 바이닐 셀렉터**. 마우스를 올리면 레코드들이 웨이브처럼 벌어지며 올라오고, 앨범을 클릭하면 **3D 입체 LP판이 앨범 커버 위로 솟아 회전**하며 바로 우측 허공에 컴팩트한 설명(앨범명·대략적 발매 시기·1~2줄 소개·대표곡 재생)이 떠오른다.
+2. **`ABOUT MAZE` (`TimelineSection.tsx`)**: 카드 높이와 크기를 한층 키운 `2×2` 대형 벤토 카드(`S1` 1960s–1976 → `S2` 1977–1986 → `S3` 1989–1995 → `S4` 2000s–2024+) 우측 영역에 **A안 다크 페이드 통합 사진**을 배치한다. `S1`에는 좌우 여백을 자연스럽게 확장·보정한 초기 7인 밴드 단체 사진(`/images/maze-origins.jpg`), `S2`·`S3`에는 해당 시대 대표 앨범 아트워크, `S4`에는 올화이트 의상의 프랭키 베벌리 무대 사진(Wikimedia CC)을 녹여낸다.
+3. **`DISCOGRAPHY` (`DiscographySection.tsx` + `VinylSelector3D.tsx`)**: 마우스 반응형 9장 3D 비스듬한 바이닐 셀렉터. 앨범을 클릭하면 **가운데 원형 라벨에 해당 앨범 커버 사진이 담긴 3D 입체 LP판이 위로 솟아 회전**하며 바로 우측 허공에 컴팩트한 설명(`Bebas Neue` 타이틀 + `NanumSquare` 소개 + 대표곡 재생)이 떠오른다.
 
 | 장 | 연도 | 앨범명 | 레이블 | 구분 | 대표곡 (30초 미리듣기 1곡) | 비고 |
 | :-: | :-: | :--- | :--- | :---: | :--- | :--- |
@@ -134,9 +134,9 @@
 | **08** | 1989 | *Silky Soul* | Warner Bros. Records | 정규 7집 | **`"Can't Get Over You"`** | **작성자 최애곡 ★ (지정)** |
 | **09** | 1993 | *Back to Basics* | Warner Bros. Records | 정규 8집 | `"Laid Back Girl"` | 마지막 정규 스튜디오 앨범 |
 
-4. **`RECOMMENDS` (`CurationSection.tsx`)**: 상단 굵은 NanumSquare Bold 개인 노트 + 하단 4곡(`Can't Get Over You`, `We Are One`, `Before I Let Go`, `Golden Time of Day`) `2×2` 대형 트랙 카드.
-5. **`LIVE` (`SoundLiveSection.tsx`)**: 공연장·연도·서술형 짜잘한 텍스트를 모두 제거한 깔끔한 YouTube 라이브 탭(`Live in London '95` / `Before I Let Go LA '86`) + 우측 시그니처 사운드 3요소 카드 + 하단 슬림 리듬 비주얼라이저.
-6. **`OUTRO` (`EndingSection.tsx`)**: 확대된 선셋 헌정 타이포(`In Loving Memory of Frankie Beverly`, `1946 — 2024`) + 액션 버튼 + `1px` 점선 3단 교육용 출처 푸터.
+4. **`RECOMMENDS` (`CurationSection.tsx`)**: *"Maze와 Frankie Beverly에게 빠지게 된 이유"* 메인 노트 + 4곡(`Can't Get Over You`, `We Are One`, `Before I Let Go`, `Golden Time of Day`) `2×2` 대형 트랙 카드.
+5. **`LIVE` (`SoundLiveSection.tsx`)**: 하단 비주얼라이저와 군더더기 텍스트를 완전히 제거하고, 깔끔한 YouTube 라이브 탭(`Live in London '95` / `Before I Let Go LA '86`) + 우측 시그니처 사운드 3요소 카드만 집중 배치.
+6. **`OUTRO` (`EndingSection.tsx`)**: 선셋 헌정 타이포(`In Loving Memory of Frankie Beverly`, `1946 — 2024`)와 액션 버튼 왼쪽 블록 오른쪽에 **모서리가 어두운 배경과 부드럽게 융합되는 프랭키 베벌리 포트레이트(`/images/frankie-outro.jpg`)**를 나란히 묶어 사이트 중앙에 정렬하고, 아래에 `1px` 점선 3단 교육용 출처 푸터를 배치.
 
 ---
 
@@ -183,6 +183,9 @@ Public GitHub 저장소(`GustavoAndTaco/FrankieBeverly`) 및 Vercel 공개 웹 �
 
 ```text
 public/animations/menu-motion.json # 데스크톱 좌측 메뉴 모션 참고 에셋
+public/images/
+├── maze-origins.jpg              # S1 초기 7인 밴드 단체 사진 (화질 보정 & 좌우 확장)
+└── frankie-outro.jpg             # OUTRO 프랭키 베벌리 미소 포트레이트 (화질 보정)
 components.json                   # shadcn/ui (New York 스타일, Tailwind v4) 설정
 src/
 ├── lib/
@@ -192,16 +195,16 @@ src/
 │   │   └── itunes/
 │   │       └── route.ts          # Apple iTunes Search API 서버 프록시 & 캐시
 │   ├── fonts/                    # 로컬 나눔스퀘어 OTF (L/R/B/EB)
-│   ├── globals.css               # shadcn/ui 다크 토큰, 그레인, 3D 바이닐/볼륨 슬라이더 스타일
-│   ├── layout.tsx                # Monoton, Cormorant Garamond, NanumSquare, JetBrains Mono & AudioProvider
+│   ├── globals.css               # shadcn/ui 다크 토큰, soft-edge-mask, 3D 바이닐/볼륨 슬라이더 스타일
+│   ├── layout.tsx                # Monoton, Bebas Neue, NanumSquare, JetBrains Mono & AudioProvider
 │   └── page.tsx                  # 6개 스택 카드 섹션 조립
 ├── context/
 │   └── AudioPlayerContext.tsx    # 전역 단일 <audio> 제어, 진행률, 볼륨 조절, 현재 재생 트랙 상태
 ├── data/
 │   ├── albums.ts                 # 1977~1993 9장 바이닐 셀렉터 데이터
-│   ├── timeline.ts               # 4단계 굵직한 시대별 타임라인 데이터 (S1~S4, 2×2 벤토 그리드)
-│   ├── curation.ts               # 작성자 짧은 노트 & 최애곡/추천곡 2×2 라이너 노트 데이터
-│   └── media.ts                  # YouTube 라이브 영상 ID, 사운드 3요소, 교육 과제 고지
+│   ├── timeline.ts               # 4단계 시대별 타임라인 데이터 (S1~S4, 사진·커버 매핑)
+│   ├── curation.ts               # 개인 감상 문구 & 최애곡/추천곡 2×2 데이터
+│   └── media.ts                  # YouTube 라이브 영상 ID, Wikimedia CC 출처, 사운드 3요소, 고지 문구
 └── components/
     ├── ui/                       # shadcn/ui 공용 프리미티브
     │   ├── badge.tsx
@@ -211,22 +214,22 @@ src/
     │   ├── separator.tsx
     │   └── tabs.tsx
     ├── layout/
-    │   ├── LeftRadialMenu.tsx    # 화면 좌측 고정 6대메뉴 곡선 롤링 내비게이션
+    │   ├── LeftRadialMenu.tsx    # 50% 확대된 좌측 고정(z-[90]) 6대메뉴 곡선 롤링 내비게이션
     │   └── MiniPlayer.tsx        # 하단 플로팅 미니 바이닐 플레이어 (+ 음량 조절 슬라이더)
     ├── motion/                   # Next.js 16 SSR 안전 모션 그래픽 · 카드 스택 래퍼
-    │   ├── SectionCard.tsx       # GSAP ScrollTrigger 기반 스택 카드 + 선셋 그라데이션 커튼
+    │   ├── SectionCard.tsx       # GSAP ScrollTrigger 스택 카드 + 36vh 간격 + 동적 sticky 오프셋
     │   ├── RiveCanvas.tsx        # Rive State Machine 인터랙티브 캔버스 래퍼
     │   ├── SplineScene.tsx       # Spline 3D 씬 클라이언트 동적 래퍼
     │   └── LottiePlayer.tsx      # DotLottie 벡터 모션 클라이언트 래퍼
     ├── sections/
     │   ├── IntroSection.tsx      # ① 150% 확대 Monoton 선셋 로고 & 마우스 3D 패럴랙스
-    │   ├── TimelineSection.tsx   # ② ABOUT MAZE — 2×2 대형 벤토 타임라인 (S1~S4)
+    │   ├── TimelineSection.tsx   # ② ABOUT MAZE — 대형 2×2 벤토 타임라인 + A안 다크 페이드 사진
     │   ├── DiscographySection.tsx# ③ DISCOGRAPHY — 3D 바이닐 셀렉터 래퍼
     │   ├── CurationSection.tsx   # ④ RECOMMENDS — 개인 노트 + 2×2 대형 트랙 카드
-    │   ├── SoundLiveSection.tsx  # ⑤ LIVE — 깔끔한 YouTube 임베드 + 사운드 3요소 + 비주얼라이저
-    │   └── EndingSection.tsx     # ⑥ OUTRO — 선셋 헌정 클로징 + 1px 점선 3단 푸터
+    │   ├── SoundLiveSection.tsx  # ⑤ LIVE — 깔끔한 YouTube 임베드 + 사운드 3요소 (비주얼라이저 제거)
+    │   └── EndingSection.tsx     # ⑥ OUTRO — 중앙 정렬 헌정 + 페더드 포트레이트 + 1px 점선 푸터
     └── vinyl-book/
-        └── VinylSelector3D.tsx   # 마우스 반응형 9장 3D 비스듬한 셀렉터 + 상단 3D 회전 LP + 허공 설명
+        └── VinylSelector3D.tsx   # 마우스 반응형 9장 3D 셀렉터 + 중앙 앨범 커버 회전 LP + 허공 설명
 ```
 
 ---

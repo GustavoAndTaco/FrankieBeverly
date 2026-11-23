@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Cormorant_Garamond,
-  JetBrains_Mono,
-  Monoton,
-} from "next/font/google";
+import { Bebas_Neue, JetBrains_Mono, Monoton } from "next/font/google";
 import localFont from "next/font/local";
 import { LeftRadialMenu } from "@/components/layout/LeftRadialMenu";
 import { MiniPlayer } from "@/components/layout/MiniPlayer";
@@ -18,10 +14,10 @@ const monoton = Monoton({
   display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
-  weight: ["400", "500", "600", "700"],
+const bebasNeue = Bebas_Neue({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-serif",
+  variable: "--font-bebas",
   display: "swap",
 });
 
@@ -72,7 +68,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={cn(
         "dark scroll-smooth",
         monoton.variable,
-        cormorant.variable,
+        bebasNeue.variable,
         nanumSquare.variable,
         jetbrainsMono.variable,
       )}

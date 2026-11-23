@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -18,7 +18,7 @@ interface SectionCardProps {
   children: ReactNode;
 }
 
-/** Stacked exhibition card wrapper with GSAP ScrollTrigger depth fade & sunset gradient curtain veil. */
+/** Stacked card stage with dynamic tall-section sticky offset, scroll breathing gap, & GSAP curtain. */
 export function SectionCard({
   id,
   zIndex,
@@ -31,6 +31,32 @@ export function SectionCard({
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const veilRef = useRef<HTMLDivElement>(null);
+  const [stickyTop, setStickyTop] = useState<number | null>(null);
+
+  // Dynamically compute sticky top so taller sections scroll fully into view before pinning
+  useEffect(() => {
+    if (isLast) return;
+    const sectionEl = sectionRef.current;
+    if (!sectionEl) return;
+
+    const updateTop = () => {
+      if (window.innerWidth < 1024) {
+        setStickyTop(null);
+        return;
+      }
+      const overflow = window.innerHeight - sectionEl.offsetHeight;
+      setStickyTop(Math.min(0, overflow));
+    };
+
+    updateTop();
+    const ro = new ResizeObserver(updateTop);
+    ro.observe(sectionEl);
+    window.addEventListener("resize", updateTop, { passive: true });
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateTop);
+    };
+  }, [isLast]);
 
   useGSAP(
     () => {
@@ -39,9 +65,11 @@ export function SectionCard({
       const veilEl = veilRef.current;
       if (!sectionEl || !contentEl || isLast) return;
 
-      const nextCard = sectionEl.nextElementSibling?.nextElementSibling as
-        | HTMLElement
-        | null;
+      const allCards = Array.from(
+        document.querySelectorAll<HTMLElement>("section[data-section-id]"),
+      );
+      const currentIdx = allCards.indexOf(sectionEl);
+      const nextCard = currentIdx >= 0 ? allCards[currentIdx + 1] : null;
       if (!nextCard) return;
 
       const mm = gsap.matchMedia();
@@ -98,7 +126,10 @@ export function SectionCard({
       <section
         ref={sectionRef}
         data-section-id={id}
-        style={{ zIndex }}
+        style={{
+          zIndex,
+          ...(stickyTop !== null ? { top: `${stickyTop}px` } : {}),
+        }}
         className={cn(
           "relative flex w-full flex-col justify-center bg-[#110E0C]",
           isLast ? "min-h-screen" : "min-h-screen lg:sticky lg:top-0",
@@ -144,17 +175,25 @@ export function SectionCard({
           />
         ) : null}
 
-        {/* Safe viewport-filling container cleared from the fixed LeftRadialMenu */}
+        {/* Safe viewport-filling container cleared from the 50% larger fixed LeftRadialMenu */}
         <div
           ref={contentRef}
           className={cn(
-            "relative z-10 mx-auto w-full max-w-[1520px] px-5 pt-16 pb-16 sm:px-8 lg:py-12 lg:pr-10 lg:pl-[255px] xl:pr-14 xl:pl-[275px]",
+            "relative z-10 mx-auto w-full max-w-[1540px] px-5 pt-16 pb-16 sm:px-8 lg:py-16 lg:pr-10 lg:pl-[315px] xl:pr-14 xl:pl-[345px]",
             innerClassName,
           )}
         >
           {children}
         </div>
       </section>
+
+      {/* Breathing scroll spacer between stacked cards so next section never overlaps prematurely */}
+      {!isLast ? (
+        <div
+          aria-hidden="true"
+          className="hidden h-[36vh] w-full bg-transparent lg:block"
+        />
+      ) : null}
     </>
   );
 }

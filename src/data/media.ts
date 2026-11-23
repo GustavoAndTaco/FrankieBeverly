@@ -1,3 +1,11 @@
+export interface ArtistPhotoCredit {
+  url: string;
+  alt: string;
+  author: string;
+  license: string;
+  sourceUrl: string;
+}
+
 export interface LiveVideoItem {
   id: string;
   tabLabel: string;
@@ -10,6 +18,15 @@ export interface SoundTrait {
   title: string;
   description: string;
 }
+
+/** Verified Wikimedia Commons CC BY 2.0 portrait of Frankie Beverly (used in S4). */
+export const ARTIST_PHOTO: ArtistPhotoCredit = {
+  url: "https://upload.wikimedia.org/wikipedia/commons/e/e5/Frankie_Beverly.jpg",
+  alt: "Frankie Beverly performing live on stage in white attire",
+  author: "William Henderson (darkfiber22)",
+  license: "CC BY 2.0",
+  sourceUrl: "https://commons.wikimedia.org/wiki/File:Frankie_Beverly.jpg",
+};
 
 /** Verified live performance embeds for LIVE section (YouTube privacy-enhanced mode). */
 export const LIVE_VIDEOS: LiveVideoItem[] = [

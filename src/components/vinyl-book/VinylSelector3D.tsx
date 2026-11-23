@@ -14,12 +14,14 @@ import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import { ALBUMS, type AlbumItem } from "@/data/albums";
 import { cn } from "@/lib/utils";
 
-/** 3D tactile Vinyl LP disc that rises upward from the selected album cover and spins. */
+/** 3D tactile Vinyl LP disc with center album cover artwork & crisp 33⅓ RPM spin. */
 function VinylDisc3D({
   album,
+  artworkUrl,
   isPlaying,
 }: {
   album: AlbumItem;
+  artworkUrl: string | null;
   isPlaying: boolean;
 }) {
   const tiltX = useMotionValue(0);
@@ -46,70 +48,97 @@ function VinylDisc3D({
         rotateY,
         transformStyle: "preserve-3d",
       }}
-      className="relative size-[170px] sm:size-[205px] lg:size-[225px]"
+      className="relative size-[190px] sm:size-[225px] lg:size-[245px]"
     >
       {/* 3D Thickness Rim Shadow */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 translate-y-1.5 rounded-full bg-black/75 blur-[3px]"
+        className={cn(
+          "absolute inset-0 translate-y-2 rounded-full transition-all duration-500",
+          isPlaying
+            ? "bg-[#E07A2F]/30 blur-[18px]"
+            : "bg-black/75 blur-[4px]",
+        )}
       />
 
       {/* Main Spinning Vinyl Platter */}
       <div
         className={cn(
-          "relative size-full rounded-full border border-white/20 shadow-[0_22px_45px_rgba(0,0,0,0.85),inset_0_1px_3px_rgba(255,255,255,0.22)]",
-          isPlaying ? "animate-vinyl-spin" : "animate-vinyl-spin-paused",
+          "relative size-full rounded-full border shadow-[0_24px_50px_rgba(0,0,0,0.85),inset_0_1px_4px_rgba(255,255,255,0.24)] transition-colors duration-300",
+          isPlaying
+            ? "animate-vinyl-spin border-[#F4B942]/45"
+            : "animate-vinyl-spin-paused border-white/20",
         )}
         style={{
           background:
             "repeating-radial-gradient(circle, #191513 0px, #191513 2.5px, #0C0A09 3.5px, #0C0A09 6px)",
         }}
       >
-        {/* Dynamic Light Sheen */}
+        {/* Asymmetric Light Sheen so rotation is visibly unmistakable */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 rounded-full opacity-40"
+          className="absolute inset-0 rounded-full opacity-50"
           style={{
             background:
-              "conic-gradient(from 35deg, transparent 0deg, rgba(255,243,209,0.42) 32deg, transparent 68deg, transparent 180deg, rgba(224,122,47,0.3) 215deg, transparent 255deg)",
+              "conic-gradient(from 25deg, transparent 0deg, rgba(255,243,209,0.5) 28deg, transparent 62deg, transparent 180deg, rgba(224,122,47,0.38) 212deg, transparent 248deg)",
           }}
         />
 
         {/* Beveled Inner Groove Ring */}
         <div
           aria-hidden="true"
-          className="absolute inset-[14%] rounded-full border border-white/[0.06]"
+          className="absolute inset-[13%] rounded-full border border-white/[0.08]"
         />
 
-        {/* Center Label */}
+        {/* Circular Center Label with Album Cover Photo (MiniPlayer style) */}
         <div
-          className="absolute top-1/2 left-1/2 flex size-[38%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-2 border-black/40 p-2 text-center shadow-[inset_0_2px_6px_rgba(255,255,255,0.25)]"
+          className="absolute top-1/2 left-1/2 flex size-[46%] -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full border-2 border-[#FFF3D1]/40 shadow-[0_0_18px_rgba(0,0,0,0.75)]"
           style={{ backgroundColor: album.vinylLabelColor }}
         >
-          <span className="font-mono text-[8px] font-bold tracking-widest text-[#FFF3D1]/90 uppercase sm:text-[9px]">
-            {album.year}
-          </span>
-          {/* Metallic 3D Spindle Pin */}
-          <span className="my-1 size-3 rounded-full border border-[#FFF3D1]/60 bg-gradient-to-br from-[#FFF3D1] via-[#8C6A4A] to-[#181310] shadow-sm" />
-          <span className="max-w-full truncate font-sans text-[7px] font-bold text-[#FFF3D1]/85 sm:text-[8px]">
-            MAZE
-          </span>
+          {artworkUrl ? (
+            <Image
+              src={artworkUrl}
+              alt={`${album.title} 센터 라벨`}
+              fill
+              sizes="120px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex size-full flex-col items-center justify-center p-2 text-center">
+              <span className="font-display text-sm tracking-widest text-[#FFF3D1]">
+                {album.year}
+              </span>
+              <span className="font-display text-xs tracking-wider text-[#FFF3D1]/80">
+                MAZE
+              </span>
+            </div>
+          )}
+
+          {/* Subtle glossy ring + metallic 3D spindle pin */}
+          <span
+            aria-hidden="true"
+            className="relative z-10 size-4 rounded-full border border-[#FFF3D1]/75 bg-gradient-to-br from-[#FFF3D1] via-[#8C6A4A] to-[#110E0C] shadow-md"
+          />
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 left-1/2 z-20 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#110E0C]"
+          />
         </div>
       </div>
     </motion.div>
   );
 }
 
-/** Mouse-reactive 3D angled vinyl crate selector modeled on vinyl-selector.riv + user sketch. */
+/** Mouse-reactive 3D angled vinyl crate selector with rotating center-cover LP & floating mid-air info. */
 export function VinylSelector3D() {
   const { mediaMap, currentAlbumId, isPlaying, playAlbum } = useAudioPlayer();
-  const [selectedIndex, setSelectedIndex] = useState<number>(7); // Default highlight: Silky Soul (1989)
+  const [selectedIndex, setSelectedIndex] = useState<number>(7);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const selectedAlbum = ALBUMS[selectedIndex];
+  const selectedArtwork = mediaMap[selectedAlbum.id]?.artworkUrl ?? null;
   const isCurrentPlaying = currentAlbumId === selectedAlbum.id && isPlaying;
 
-  // Prefetch all 9 covers once mediaMap arrives so the entire 9-album crate looks crisp immediately
   useEffect(() => {
     ALBUMS.forEach((album) => {
       const url = mediaMap[album.id]?.artworkUrl;
@@ -133,12 +162,10 @@ export function VinylSelector3D() {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowRight") {
       e.preventDefault();
-      const next = Math.min(ALBUMS.length - 1, selectedIndex + 1);
-      setSelectedIndex(next);
+      setSelectedIndex((prev) => Math.min(ALBUMS.length - 1, prev + 1));
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
-      const prev = Math.max(0, selectedIndex - 1);
-      setSelectedIndex(prev);
+      setSelectedIndex((prev) => Math.max(0, prev - 1));
     }
   };
 
@@ -149,10 +176,10 @@ export function VinylSelector3D() {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       aria-label="3D 바이닐 셀렉터 (마우스로 탐색하고 클릭하여 재생)"
-      className="relative flex min-h-[76vh] w-full flex-col justify-between outline-none"
+      className="relative flex min-h-[78vh] w-full flex-col justify-between outline-none"
     >
       {/* Upper Showcase Stage: Rising 3D LP + Floating Mid-Air Description */}
-      <div className="relative flex min-h-[300px] w-full items-center justify-center sm:min-h-[340px]">
+      <div className="relative flex min-h-[320px] w-full items-center justify-center sm:min-h-[360px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedAlbum.id}
@@ -161,7 +188,7 @@ export function VinylSelector3D() {
             exit={{ opacity: 0, y: 30, scale: 0.94 }}
             transition={{ type: "spring", stiffness: 210, damping: 24 }}
             className={cn(
-              "relative flex w-full max-w-[920px] flex-col items-center justify-center gap-6 sm:gap-10 md:flex-row",
+              "relative flex w-full max-w-[940px] flex-col items-center justify-center gap-6 sm:gap-10 md:flex-row",
               floatOnLeftSide ? "md:flex-row-reverse" : "md:flex-row",
             )}
           >
@@ -176,17 +203,20 @@ export function VinylSelector3D() {
               }
               className="group relative shrink-0 cursor-pointer outline-none"
             >
-              <VinylDisc3D album={selectedAlbum} isPlaying={isCurrentPlaying} />
+              <VinylDisc3D
+                album={selectedAlbum}
+                artworkUrl={selectedArtwork}
+                isPlaying={isCurrentPlaying}
+              />
             </button>
 
-            {/* Mid-Air Floating Compact Description (No Box Card — pure floating typography + curved pointer) */}
+            {/* Mid-Air Floating Compact Description */}
             <motion.div
               initial={{ opacity: 0, x: floatOnLeftSide ? -18 : 18 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.08, duration: 0.35 }}
-              className="animate-float-gentle relative max-w-[400px] text-center md:text-left"
+              className="animate-float-gentle relative max-w-[420px] text-center md:text-left"
             >
-              {/* Delicate curved pointer line matching the user sketch */}
               <svg
                 aria-hidden="true"
                 viewBox="0 0 64 32"
@@ -216,7 +246,7 @@ export function VinylSelector3D() {
                 {selectedAlbum.approxRelease}
               </p>
 
-              <h3 className="mt-1 font-sans text-2xl font-extrabold tracking-tight text-[#FFF3D1] drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)] sm:text-3xl lg:text-[34px]">
+              <h3 className="mt-1 font-display text-3xl tracking-[0.04em] text-[#FFF3D1] drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)] sm:text-4xl lg:text-[44px] lg:leading-[1.04]">
                 {selectedAlbum.title}
               </h3>
 
@@ -228,7 +258,7 @@ export function VinylSelector3D() {
                 <button
                   type="button"
                   onClick={() => playAlbum(selectedAlbum.id)}
-                  className="sunset-bg inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 font-sans text-xs font-extrabold text-[#110E0C] shadow-[0_6px_24px_rgba(224,122,47,0.35)] transition-transform hover:scale-[1.03] active:scale-[0.98]"
+                  className="sunset-bg inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 font-display text-base tracking-[0.08em] text-[#110E0C] shadow-[0_6px_24px_rgba(224,122,47,0.35)] transition-transform hover:scale-[1.03] active:scale-[0.98]"
                 >
                   {isCurrentPlaying ? (
                     <>
@@ -247,7 +277,7 @@ export function VinylSelector3D() {
                   href={selectedAlbum.spotifySearchUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground transition-colors hover:text-[#FFF3D1]"
+                  className="inline-flex items-center gap-1 font-display text-sm tracking-[0.08em] text-muted-foreground transition-colors hover:text-[#FFF3D1]"
                 >
                   Spotify
                   <ExternalLink className="size-3" />
@@ -256,7 +286,7 @@ export function VinylSelector3D() {
                   href={selectedAlbum.youtubeSearchUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground transition-colors hover:text-[#FFF3D1]"
+                  className="inline-flex items-center gap-1 font-display text-sm tracking-[0.08em] text-muted-foreground transition-colors hover:text-[#FFF3D1]"
                 >
                   YouTube
                   <ExternalLink className="size-3" />
@@ -267,7 +297,7 @@ export function VinylSelector3D() {
         </AnimatePresence>
       </div>
 
-      {/* Bottom 9 Angled 3D Vinyl Sleeves Rack (Rive-style mouse wave crate) */}
+      {/* Bottom 9 Angled 3D Vinyl Sleeves Rack */}
       <div className="mt-8 w-full">
         <div
           onMouseLeave={() => setHoveredIndex(null)}
@@ -280,11 +310,9 @@ export function VinylSelector3D() {
               const isSelected = idx === selectedIndex;
               const isHovered = idx === hoveredIndex;
 
-              // Spread neighboring sleeves smoothly around hovered/selected record
               const focusIdx = hoveredIndex ?? selectedIndex;
               const delta = idx - focusIdx;
-              const spreadX =
-                delta === 0 ? 0 : delta < 0 ? -14 : 18;
+              const spreadX = delta === 0 ? 0 : delta < 0 ? -14 : 18;
               const rotateY = isSelected ? -8 : isHovered ? -14 : -34;
               const liftY = isSelected ? -34 : isHovered ? -18 : 0;
 
@@ -334,16 +362,15 @@ export function VinylSelector3D() {
                         background: `linear-gradient(150deg, #251D19 0%, ${album.vinylLabelColor}55 100%)`,
                       }}
                     >
-                      <span className="font-mono text-[10px] text-[#FFF3D1]/70">
+                      <span className="font-display text-xs tracking-wider text-[#FFF3D1]/70">
                         {album.year}
                       </span>
-                      <span className="line-clamp-2 font-serif text-sm font-bold leading-tight text-[#FFF3D1]">
+                      <span className="line-clamp-2 font-display text-base leading-tight text-[#FFF3D1]">
                         {album.title}
                       </span>
                     </div>
                   )}
 
-                  {/* Sleeve top gloss highlight */}
                   <div
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-white/15"
@@ -364,7 +391,7 @@ export function VinylSelector3D() {
                 type="button"
                 onClick={() => handleSelectAlbum(idx)}
                 className={cn(
-                  "cursor-pointer rounded-full px-3 py-1 font-mono text-[11px] font-medium transition-colors",
+                  "cursor-pointer rounded-full px-3 py-1 font-display text-sm tracking-[0.08em] transition-colors",
                   isSelected
                     ? "bg-[#E07A2F]/25 text-[#FFF3D1]"
                     : "text-muted-foreground hover:text-foreground",
