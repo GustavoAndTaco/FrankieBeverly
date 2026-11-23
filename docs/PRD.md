@@ -11,10 +11,10 @@
 | **프로젝트명** | `FrankieBeverly` |
 | **과제 정보** | 멀티미디어 콘텐츠 제작 텀 프로젝트 |
 | **작성자** | 20231044 박해신 |
-| **문서 버전** | v1.0 (2026-11-24 확정) |
+| **문서 버전** | v2.0 (2026-11-24 6섹션 카드 커튼 · 좌측 롤링 메뉴 · 3D 바이닐 셀렉터 · 나눔스퀘어 개편 완료) |
 | **GitHub 저장소** | https://github.com/GustavoAndTaco/FrankieBeverly (Public) |
 | **배포 목표** | Vercel 무료 웹 호스팅 (과제 제출용 라이브 URL 확보 및 시연) |
-| **기술 스택** | Next.js `16.4.6` (App Router, `src/`), React `19.3.0`, TypeScript, Tailwind CSS `4.3.3` |
+| **기술 스택** | Next.js `16.4.6` (App Router, `src/`), React `19.3.0`, TypeScript, Tailwind CSS `4.3.3`, **shadcn/ui** |
 
 ---
 
@@ -33,14 +33,15 @@
 
 ## 3. 전체 UX 구조 & 네비게이션 (Information Architecture)
 
-### 3.1 탐색 패턴: 원페이지 스크롤리텔링 (Scrollytelling)
-- **흐름**: 인트로(①)부터 헌정 엔딩(⑦)까지 7개 섹션이 하나의 전시 동선처럼 세로 스크롤 서사로 이어진다.
-- **고정 미니 내비게이션**:
-  - 데스크톱: 상단 미니 바 또는 우측 도트/챕터 인디케이터로 현재 감상 중인 섹션을 실시간 하이라이트하며, 클릭 시 해당 섹션으로 부드럽게 스크롤(`scroll-behavior: smooth`)한다.
-  - 모바일: 상단 컴팩트 드롭다운/칩 바 형태로 섹션 점프를 지원한다.
+### 3.1 탐색 패턴: 스택 카드 커튼 스크롤 (Stacked Card Curtain Scrollytelling)
+- **흐름**: `INTRO`부터 `OUTRO`까지 **총 6개 섹션**(기존 ② Identity 제거)이 화면을 가득 채우는 카드로 쌓여 있으며, 다음 섹션으로 이동할 때 다음 카드가 앞선 카드를 선셋 그라데이션 커튼으로 부드럽게 덮으며 올라온다(GSAP `ScrollTrigger`).
+- **좌측 고정 롤링 내비게이션 (`LeftRadialMenu`)**:
+  - 상단 가로 바를 제거하고, `메뉴 선택 모션.json`의 곡선 롤링 다이얼과 선셋 점(`#FDF6C8` → `#FEA864` → `#FF5900`) 모션을 구현한 내비게이션이 **화면 왼쪽에 항상 고정**된다.
+  - 6개 대문자 메뉴: **`INTRO`** · **`ABOUT MAZE`** · **`DISCOGRAPHY`** · **`RECOMMENDS`** · **`LIVE`** · **`OUTRO`**
+  - 본문 컨테이너는 데스크톱 기준 좌측 안전 여백(`lg:pl-[255px]`)을 확보해 좌측 메뉴와 절대 겹치지 않으며 화면을 꽉 채워 가독성을 극대화한다.
 - **글로벌 하단 플로팅 미니 플레이어**:
-  - 섹션 ④(바이닐 북)나 섹션 ⑥(나의 큐레이션)에서 곡을 재생한 뒤 다른 섹션으로 스크롤해도 음악이 끊기지 않고 화면 하단에 미니 플레이어가 유지된다.
-  - 표시 요소: 회전하는 미니 바이닐 썸네일, 곡명 · 앨범명(연도), 재생/일시정지 버튼, 30초 미리듣기 진행 프로그레스 바, 현재 재생 위치(`0:14 / 0:30`), 닫기/음소거 컨트롤.
+  - 곡 재생 시 화면 하단에 미니 플레이어가 유지된다.
+  - 표시 요소: 회전 미니 바이닐 썸네일, 곡명 · 대략적 발매 시기, 재생/일시정지, 30초 진행 바, **음량 조절 슬라이더(Mute 포함)**, 닫기 컨트롤.
 
 ### 3.2 언어 및 반응형 기준
 - **언어 구성**: 한국어 본문 및 내비게이션 + 영문 아티스트명 · 앨범명 · 곡명 · 에디토리얼 타이포그래피 포인트
@@ -50,32 +51,41 @@
 
 ## 4. 비주얼 디자인 시스템 (Visual Identity & Typography)
 
-### 4.1 컬러 팔레트: 웜 다크 리스닝 룸 + 올화이트 드라마틱 전환
-70년대 심야 소울 리스닝 룸의 따뜻하고 깊은 분위기 속에, Maze의 상징인 **올화이트(All-White) 드레스코드**를 공간 배경 전환으로 극대화한다.
+### 4.1 컬러 팔레트 & 디자인 레퍼런스: `droppable.app` 스타일 컴팩트 다크 + 선셋 포인트
+전체 웹사이트는 레퍼런스 사이트([droppable.app](https://www.droppable.app/))의 **깔끔하고 컴팩트한 다크 미니멀리즘**을 설계 기준으로 삼는다.
+- **레이아웃·서피스 규격 (`droppable.app` 벤치마크 + shadcn/ui 연동)**:
+  - 깊은 매트 다크 캔버스(`#110E0C`) 위에 살짝 밝은 차콜 카드 서피스(`#181412`)를 배치한다.
+  - 얇은 `1px` 미세 보더(`rgba(255,255,255,0.08)` / `#2A221E`), 둥근 모서리(`16~20px`), `12px`의 촘촘한 벤토(Bento) 그리드 간격, 중앙 정렬 컨테이너(`max-width: 1000px`), `1px` 점선(`dashed`) 푸터 구분선으로 정갈한 밀도를 만든다.
+  - **shadcn/ui 시맨틱 토큰 매핑**: `src/app/globals.css`의 `--background`, `--foreground`, `--card`, `--border`, `--muted`, `--primary`, `--ring` 변수를 위 다크 + 선셋 팔레트에 직접 연결해 모든 UI 프리미티브(`Button`, `Card`, `Badge`, `Tabs`, `Separator`, `Progress`)가 일관된 톤을 유지하도록 한다.
+  - **원-액센트 절제(Single-Accent Discipline)**: 노을빛 **선셋 그라데이션**을 유일한 고채도 포인트로 두고, 상단 스크롤 바·보조 라벨·보더는 무채색 회색 톤으로 눌러 시각적 피로도를 없앤다.
 
 | 테마 영역 | 토큰명 | HEX | 용도 |
 | :--- | :--- | :--- | :--- |
-| **Dark Listening Room**<br>(섹션 ①, ③, ④, ⑤, ⑥) | `Warm Espresso` | `#120E0C` | 기본 배경 |
-| | `Vinyl Charcoal` | `#1C1512` | 카드 · 북 커버 · 패널 표면 |
-| | `Groove Border` | `#2E231D` | 미세 구분선 · LP 슬리브 보더 |
+| **Compact Dark Canvas**<br>(전 섹션 일관된 다크 톤) | `Deep Matte Dark` | `#110E0C` | 기본 다크 배경 |
+| | `Vinyl Charcoal` | `#181412` | 벤토 카드 · 북 커버 · 패널 표면 |
+| | `Hairline Border` | `#2A221E` *(rgba 0.08)* | `1px` 미세 카드 보더 · 점선(`dashed`) 구분선 |
 | | `Cream Text` | `#F5EFE6` | 기본 본문 텍스트 |
 | | `Muted Warm Gray` | `#A89B8C` | 캡션 · 메타 정보 · 보조 텍스트 |
-| **Retro Sunset Accents**<br>(70s 소울 & 강조) | `Sunset Gold` | `#F4B942` | 주요 CTA · 활성 탭 · 타임라인 포인트 |
+| **Muted UI Chrome**<br>(무채색 절제 크롬) | `Muted Slate Gray` | `#6E6863` | 상단 고정 회색 스크롤 바 진행률 · 비활성 탭 |
+| | `Subtle Track Gray` | `rgba(255,255,255,0.16)` | 상단 스크롤 바 트랙 · 미세 인디케이터 |
+| **Sunset Gradient Accents**<br>(유일한 해가 지는 노을 포인트) | `Sunset Horizon` | `#FFF3D1` | 그라데이션 상단 하이라이트 |
+| | `Sunset Gold` | `#F4B942` | 주요 CTA · 활성 포인트 · 엔딩 타이포 |
 | | `Warm Amber` | `#E07A2F` | 인트로 로고 그라데이션 · 호버 하이라이트 |
-| | `Soul Terracotta` | `#C4492D` | 70s 선셋 깊이와 포인트 라인 |
-| **All-White Gallery**<br>(섹션 ② 정체성, 섹션 ⑦ 헌정) | `Gallery Ivory` | `#FAF8F5` | 올화이트 전환 섹션 배경 |
-| | `Crisp White` | `#FFFFFF` | 카드 · 강조 프레임 표면 |
-| | `Deep Ink` | `#181310` | 라이트 섹션 본문 텍스트 |
-| | `Warm Bronze` | `#8C6A4A` | 라이트 섹션 포인트 라벨 · 구분선 |
+| | `Soul Terracotta` | `#C4492D` | 70s 선셋 하단 딥 톤 · 포인트 라인 |
+| **All-White 포인트 (확정)**<br>(섹션 ② 아티스트 프레임 한정) | `Gallery Ivory` / `Crisp White` | `#FAF8F5` / `#FFFFFF` | *전체 배경 전환 없이 다크 톤 유지, 섹션 ② 사진 프레임·배지 포인트로만 활용* |
+| | `Deep Ink` / `Warm Bronze` | `#181310` / `#8C6A4A` | *화이트 프레임 내부 캡션·라벨* |
 
 - **아날로그 텍스처**: 전체 화면에 아주 낮은 불투명도(`opacity: 0.03~0.04`)의 SVG/CSS 필름 그레인 오버레이(`pointer-events: none`)를 적용해 과도한 GPU 부담 없이 빈티지 LP 슬리브 질감을 살린다.
 
 ### 4.2 타이포그래피 시스템
 
-#### ① 인트로 메인 로고 (`Monoton` + 레트로 선셋 그라데이션)
+#### ① 인트로 메인 로고 (`Monoton` + 해가 지는 선셋 그라데이션)
 - **전용 폰트**: Google Fonts **`Monoton`** (`weight: 400`)
-- **적용 대상**: 인트로(섹션 ①)의 `MAZE featuring FRANKIE BEVERLY` 메인 디스플레이 로고
-- **레트로 그라데이션 스타일**: 70년대 네온·선셋 바이닐 포스터 감성을 살리기 위해 텍스트 클리핑 그라데이션(`background-clip: text; color: transparent;`)과 은은한 앰버 글로우(`drop-shadow`)를 조합한다.
+- **2단 비대칭 로고 락업 구성 (1번째 참고 스케치 반영)**:
+  - **상단 행**: 크게 **`Maze`** 배치 + 바로 오른쪽 아래에 작게 **`ft`**(featuring) 배치
+  - **하단 행**: 그 바로 아래 중앙에 **`Frankie Beverly`** 배치
+  - *(참고: `Monoton` 폰트는 인라인 스트라이프가 들어간 대문자 기반 레트로 디스플레이 서체이므로, `Maze` / `ft` / `Frankie Beverly` 모두 고유의 레트로 스트라이프 조형미를 유지하며 `ft`만 크기를 낮춰 우측 하단에 정돈한다.)*
+- **선셋 그라데이션 스타일**: 해가 지는 노을을 연상시키는 수직 선셋 그라데이션 텍스트 클리핑(`background-clip: text; color: transparent;`)과 은은한 앰버 글로우(`drop-shadow`)를 조합한다.
   ```css
   background: linear-gradient(180deg, #FFF3D1 0%, #F4B942 42%, #E07A2F 75%, #C4492D 100%);
   -webkit-background-clip: text;
@@ -98,130 +108,19 @@
   ```
 - **Next.js 16 구현 방식**: Next.js App Router 프로덕션 최적화(외부 네트워크 요청 제거 및 자동 셀프 호스팅, CLS 방지)를 위해 `src/app/layout.tsx`에서 `next/font/google`의 `Monoton`을 불러와 CSS 변수(`--font-monoton`)로 연결하고 `.monoton-regular` 유틸리티와 동일하게 적용한다.
 
-#### ② 에디토리얼 헤딩 & 본문 폰트
-- **영문 세리프 헤딩 · 연도 · 인용구**: `Cormorant Garamond` 또는 `Playfair Display` (`next/font/google`) — 전시 도록의 우아한 대비 형성
-- **한국어 본문 · UI · 트랙리스트**: `Noto Sans KR` (`next/font/google`) 또는 `Pretendard` — 긴 해설 텍스트의 가독성 확보
+#### ② 에디토리얼 헤딩 & 본문 폰트 (`NanumSquare`)
+- **영문 세리프 헤딩 · 연도 · 인용구**: `Cormorant Garamond` (`next/font/google`)
+- **한국어 본문 · 포인트 헤딩 · 메뉴**: 로컬 **`나눔스퀘어(NanumSquare)`** OTF (`300 / 400 / 700 / 800`, `next/font/local`)를 적용하고, 섹션 타이틀·강조 문구에 **NanumSquare Bold/ExtraBold**를 사용해 시원한 가독성을 확보한다.
 
 ---
 
-## 5. 전체 와이어프레임 & 7개 섹션 상세 명세
+## 5. 전체 6개 섹션 상세 명세 (v2.0 확정)
 
-### 5.1 전체 원페이지 스크롤 와이어프레임 (Desktop View)
+*(※ 좌측에 고정된 `LeftRadialMenu`가 섹션 전환을 명확히 안내하므로, 각 섹션 내부의 불필요한 번호·제목·짜잘한 부제와 장황한 설명은 전부 제거하고 콘텐츠 박스 자체의 크기와 가독성을 화면에 맞게 극대화한다.)*
 
-```text
-+------------------------------------------------------------------------------+
-| [LOGO] MAZE / F.BEVERLY   [①인트로][②정체성][③타임라인][④바이닐북][⑤라이브][⑥큐레이션][⑦헌정] |
-+------------------------------------------------------------------------------+
-|                                                                              |
-|  [① 인트로: Warm Dark Stage (#120E0C)]                                        |
-|     - 배경: 느리게 회전하는 반투명 대형 바이닐 실루엣 + 선셋 글로우           |
-|     - 중앙: Monoton 폰트 + 레트로 선셋 그라데이션 로고                        |
-|             "MAZE featuring FRANKIE BEVERLY"                                 |
-|     - 부제: "GOLDEN TIME OF DAY · 디지털 소울 아카이브 전시"                  |
-|     - CTA : [ 전시 관람 시작 ↓ ]                                             |
-|                                                                              |
-+==============================================================================+
-|  [② 아티스트 정체성: Dramatic All-White 전환 (#FAF8F5)]                        |
-|     +-----------------------------+  +------------------------------------+  |
-|     | [CC 아티스트 사진 /         |  | 공식 명칭: Maze featuring Frankie   |  |
-|     |  올화이트 상징 SVG 프레임]   |  |  Beverly (작사·작곡·프로듀싱 총괄)  |  |
-|     |  "All-White Dress Code"     |  | · 마빈 게이(Marvin Gaye)와의 인연    |  |
-|     +-----------------------------+  | · Essence Festival 15년 폐막 헤드라이너|
-|                                      +------------------------------------+  |
-+==============================================================================+
-|  [③ 시대별 타임라인: Warm Dark (#120E0C)]                                     |
-|     [ 1960s ] ── [ 1970s ] ── [ 1980s ] ── [ 1990s ] ── [ 2000s–2024+ ]      |
-|     +--------------------------------------------------------------------+   |
-|     | 선택된 시대의 스토리 카드 · 핵심 키워드 · 대표 전환점 인포그래픽     |   |
-|     +--------------------------------------------------------------------+   |
-+==============================================================================+
-|  [④ 디스코그래피: 거대한 바이닐 앤솔로지 북 (Core Showcase)]                   |
-|     < 책장 넘기기 >  [ 9 Spreads: 1977 ~ 1993 정규 8장 + Live in New Orleans ]|
-|     +----------------------------------+----------------------------------+  |
-|     |  LEFT PAGE: 앨범 커버 & 해설      |  RIGHT PAGE: LP 슬리브 & 바이닐  |  |
-|     |  (트랙리스트 / 레이블 / 연도)     |  (재생 시 LP가 빠져나와 회전)    |  |
-|     +----------------------------------+----------------------------------+  |
-|     [ 01 ] [ 02 ] [ 03 ] [ 04 ] [ 05 ★Live ] [ 06 ] [ 07 ] [ 08 ] [ 09 ]    |
-+==============================================================================+
-|  [⑤ 사운드 & 라이브: Warm Dark (#1C1512)]                                     |
-|     [시그니처 사운드 3요소 카드] + [실시간 리듬 비주얼라이저 바]              |
-|     +--------------------------------------------------------------------+   |
-|     | YouTube 공식 라이브 퍼포먼스 Embed + Live in LA(86)/London(95) 해설 |   |
-|     +--------------------------------------------------------------------+   |
-+==============================================================================+
-|  [⑥ 나의 큐레이션: Personal Liner Notes (#120E0C)]                           |
-|     "내가 거의 매일 Maze를 듣는 이유" (개인 감상 에세이)                      |
-|     [Pick 1: Can't Get Over You] [Pick 2: We Are One] [Pick 3~4: 입문 추천]  |
-+==============================================================================+
-|  [⑦ 엔딩 & 헌정 크레딧: All-White 회귀 (#FAF8F5)]                             |
-|     "In Loving Memory of Frankie Beverly (1946–2024)"                        |
-|     [ 맨 위로 ↑ ] [ 바이닐 북 다시 보기 ]                                     |
-|     비상업적 교육 과제 고지 & 음원·영상·이미지 출처 크레딧                   |
-+------------------------------------------------------------------------------+
-| [● 미니 LP]  Can't Get Over You — Silky Soul (1989)    [▶/❚❚]  ────●─── 0:14 |
-+------------------------------------------------------------------------------+
-```
-
-### 5.2 섹션별 상세 명세
-
-#### ① 인트로 (Hero)
-- **목적**: 전시의 주제와 레트로 소울 무드를 첫 화면(First Fold)에서 강렬하게 각인
-- **구성 요소**:
-  - `Monoton` 폰트 + 레트로 선셋 그라데이션이 적용된 메인 로고 (`MAZE` / `featuring FRANKIE BEVERLY`)
-  - 1977–2024 연대 뱃지 및 한국어 전시 부제
-  - 배경 중앙/우측에 아주 느리게 회전하는 바이닐 그루브 SVG 실루엣과 선셋 앰버 오라
-  - `[전시 관람 시작 ↓]` 버튼 클릭 시 섹션 ②로 부드럽게 스크롤
-
-#### ② 아티스트 정체성 (All-White 드라마틱 전환)
-- **목적**: 짙은 다크 배경에서 밝은 아이보리/화이트(`#FAF8F5`)로 배경이 전환되며, Maze를 상징하는 **올화이트(All-White)** 미학을 시각적으로 체험시킴
-- **핵심 콘텐츠 (팩트 체크 반영)**:
-  - **공식 표기**: *Maze featuring Frankie Beverly* (거의 모든 곡을 프랭키 베벌리가 직접 작사·작곡·프로듀싱한 싱어송라이터 주도 밴드)
-  - **마빈 게이(Marvin Gaye)와의 인연**: 샌프란시스코에서 *Raw Soul*로 활동하던 시절 마빈 게이에게 발탁되어 투어 오프닝을 맡았고, 마빈 게이의 제안으로 1976년 **Maze**로 개명하며 Capitol Records 계약을 성사시킴
-  - **올화이트 드레스코드 & 커뮤니티**: 무대 위 멤버들이 입던 흰색 의상을 팬들이 객석에서 똑같이 맞춰 입기 시작하며 전설적인 전통으로 자리 잡음. 뉴올리언스 **Essence Festival** 최초 15년 연속 폐막 헤드라이너로서 흑인 음악·가족·공동체 문화를 대표
-
-#### ③ 시대별 타임라인 (Timeline)
-- **목적**: 밴드의 반세기 역사를 5개 시대로 나누어 탐색(상단/좌측 시대 버튼 클릭 + 스크롤 전환 연동)
-- **5단계 연대기 (팩트 체크 반영)**:
-  1. **`1960s` 필라델피아 뿌리**: 본명 Howard Stanley Beverly(1946년 12월 6일 필라델피아 출생). 고스펠·두왑으로 음악을 시작해 1963년 *The Butlers* 결성, 프로듀서 Kenny Gamble과 작업하며 영국 Northern Soul 씬에서 컬트적 지지를 얻음
-  2. **`1970s` 서부 이주와 도약**: 1970년경 샌프란시스코로 거점을 옮겨 *Raw Soul*로 개명 → 마빈 게이 투어 오프닝 발탁 → 1976년 *Maze*로 팀명 변경 → 1977년 Capitol Records 데뷔작 발표 후 골드 앨범 행진 시작
-  3. **`1980s` 골든 에라와 라이브 전설**: *Joy and Pain*(1980), 대표곡 `"Before I Let Go"`가 담긴 더블 라이브 앨범 *Live in New Orleans*(1981), *We Are One*(1983), *Can't Stop the Love*(1985), *Live in Los Angeles*(1986)로 R&B 최전성기 구가
-  4. **`1990s` Warner Bros. 이적과 성숙기**: Warner Bros. Records로 레이블을 옮겨 *Silky Soul*(1989)과 *Back to Basics*(1993) 발매, 1995년 런던 해머스미스 오데온 공연(*Live in London*, 2003 DVD)으로 해외 라이브 역량 입증
-  5. **`2000s–2024+` 세대를 잇는 유산**: Essence Festival의 상징적 존재감, 2019년 비욘세(Beyoncé)의 `"Before I Let Go"` 리메이크로 신세대에 재발견, 2024년 3월 *"I Wanna Thank You"* 고별 투어 및 후계 밴드(*Maze Honoring Frankie Beverly*, 보컬 Tony Lindsay) 출범, **2024년 9월 10일 향년 77세 별세** 이후까지 살아 숨 쉬는 유산
-
-#### ④ 디스코그래피 — 핵심 쇼케이스: “거대한 바이닐 앤솔로지 북 (Vinyl Gatefold Book)”
-- **핵심 컨셉**: 화면 중앙에 거대한 하드커버 게이트폴드(Gatefold) 아카이브 북이 펼쳐진다. 책의 각 장은 단순한 종이가 아니라 **앨범 슬리브(좌측)와 LP 바이닐 포켓(우측)이 한 쌍을 이루는 하나의 음반 장(Spread)**이다.
-
-##### 바이닐 북 상세 와이어프레임 (2면 펼침 구조)
-```text
-   [ Page 08 / 09 ]  Warner Bros. Era · 1989
-  +-----------------------------------+-----------------------------------+
-  |  ◀ 이전 장                        |                        다음 장 ▶  |
-  |                                   |                                   |
-  |   +---------------------------+   |        . - ~ ~ ~ - .              |
-  |   |                           |   |     . '   _______   ' .           |
-  |   |     [ Album Artwork ]     |   |    /    /  LP   \    \ ──▶ (재생 시 |
-  |   |        Silky Soul         |   |   |    | (●) ●●  |   |   슬리브에서|
-  |   |                           |   |    \    \_______/    /   나와 회전)|
-  |   +---------------------------+   |     ' .           . '             |
-  |                                   |        ' - . . - '                |
-  |   1989 · Warner Bros. Records     |   +---------------------------+   |
-  |   Silky Soul                      |   | ★ Featured Track (30s)    |   |
-  |   ─────────────────────────────   |   |   "Can't Get Over You"    |   |
-  |   [해설] 레이블 이적 후 발표한     |   |   [ ▶ 30초 미리듣기 ]      |   |
-  |   성숙한 Quiet Storm 사운드...    |   |   [ Spotify ] [ YouTube ] |   |
-  |                                   |   +---------------------------+   |
-  |   [Tracklist] 1. Silky Soul ...   |                                   |
-  |   4. Can't Get Over You ★ ...     |                  [모서리 플립 ↗]  |
-  +-----------------------------------+-----------------------------------+
-  [ 01 '77 ][ 02 '78 ][ 03 '79 ][ 04 '80 ][ 05 '81★ ][ 06 '83 ][ 07 '85 ][ 08 '89 ][ 09 '93 ]
-```
-- **인터랙션 명세**:
-  - **LP 꺼내기 & 회전**: 우측 페이지의 `[▶ 30초 미리듣기]` 또는 LP 디스크를 클릭하면 바이닐이 슬리브 포켓에서 부드럽게 미끄러져 나와(`translateX`) 33⅓ RPM 감성으로 회전(`rotate`)하며 오디오가 재생된다.
-  - **책장 넘기기 (3D Flip)**: 좌/우 네비게이션 버튼, 우측 하단 접힌 모서리(Page Curl) 클릭, 키보드 `←`/`→` 방향키, 하단 9장 챕터 탭 클릭을 모두 지원한다.
-  - **장 전환 시퀀스**: 다른 장으로 넘기면 빠져나와 있던 LP가 슬리브 안으로 복귀한 뒤, 중앙 스파인(Spine)을 축으로 3D `perspective(1800px)` + `rotateY` 플립 모션과 그림자 이동이 일어나며 다음 앨범 장이 펼쳐진다.
-  - **모바일 반응형**: 좁은 화면에서는 위/아래 스택 또는 스와이프 가능한 단일 카드 뷰로 전환되어 커버·해설·회전 바이닐을 불편 없이 감상할 수 있다.
-
-- **확정 수록 9장 데이터 (1977~1993 정규 8장 + 스페셜 라이브 1장, 앨범당 대표곡 1곡)**:
+1. **`INTRO` (`IntroSection.tsx`)**: 어두운 화면 정중앙(좌측 메뉴 여백 제외 영역)에 기존 대비 **약 150% 확대된** `Monoton` 선셋 그라데이션 로고(`MAZE ft` / `FRANKIE BEVERLY`)와 마우스 3D 패럴랙스 단독 구성.
+2. **`ABOUT MAZE` (`TimelineSection.tsx`)**: 기존 Identity 섹션을 통합/제거하고, 화면을 크게 채우는 `2×2` 대형 벤토 카드(`S1` 1960s–1976 → `S2` 1977–1986 → `S3` 1989–1995 → `S4` 2000s–2024+)와 NanumSquare Bold 제목, 핵심 요약만 깔끔하게 배치.
+3. **`DISCOGRAPHY` (`DiscographySection.tsx` + `VinylSelector3D.tsx`)**: `vinyl-selector.riv` 감성의 **마우스 반응형 9장 3D 비스듬한 바이닐 셀렉터**. 마우스를 올리면 레코드들이 웨이브처럼 벌어지며 올라오고, 앨범을 클릭하면 **3D 입체 LP판이 앨범 커버 위로 솟아 회전**하며 바로 우측 허공에 컴팩트한 설명(앨범명·대략적 발매 시기·1~2줄 소개·대표곡 재생)이 떠오른다.
 
 | 장 | 연도 | 앨범명 | 레이블 | 구분 | 대표곡 (30초 미리듣기 1곡) | 비고 |
 | :-: | :-: | :--- | :--- | :---: | :--- | :--- |
@@ -229,40 +128,15 @@
 | **02** | 1978 | *Golden Time of Day* | Capitol Records | 정규 2집 | `"Golden Time of Day"` | 전시 부제 동명 명반 |
 | **03** | 1979 | *Inspiration* | Capitol Records | 정규 3집 | `"Feel That You're Feelin'"` | 소울·펑크 완숙기 |
 | **04** | 1980 | *Joy and Pain* | Capitol Records | 정규 4집 | `"Joy and Pain"` | `"Southern Girl"` 수록 |
-| **05** | 1981 | ***Live in New Orleans*** | Capitol Records | **스페셜 라이브** | **`"Before I Let Go"`** | Saenger Theatre 실황 + 스튜디오 4트랙 |
+| **05** | 1981 | ***Live in New Orleans*** | Capitol Records | **스페셜 라이브** | **`"Before I Let Go"`** | Saenger Theatre 실황 |
 | **06** | 1983 | *We Are One* | Capitol Records | 정규 5집 | **`"We Are One"`** | **작성자 최애곡 ★** |
 | **07** | 1985 | *Can't Stop the Love* | Capitol Records | 정규 6집 | `"Back in Stride"` | R&B 차트 1위 싱글 수록 |
 | **08** | 1989 | *Silky Soul* | Warner Bros. Records | 정규 7집 | **`"Can't Get Over You"`** | **작성자 최애곡 ★ (지정)** |
-| **09** | 1993 | *Back to Basics* | Warner Bros. Records | 정규 8집 | `"Laid Back Girl"` *(또는 `"The Morning After"`)* | 마지막 정규 스튜디오 앨범 |
+| **09** | 1993 | *Back to Basics* | Warner Bros. Records | 정규 8집 | `"Laid Back Girl"` | 마지막 정규 스튜디오 앨범 |
 
-> *참고: 1986년 Capitol 라이브 앨범 `Live in Los Angeles` 및 1995년/2003년 DVD `Live in London`은 정규 8장+`Live in New Orleans` 중심 책 구성의 응집도를 지키기 위해 섹션 ⑤(사운드 & 라이브)에서 핵심 아카이브로 다룬다.*
-
-#### ⑤ 사운드 & 라이브 (Sound & Live)
-- **목적**: Maze가 단순한 스튜디오 밴드가 아니라 ‘라이브에서 완성되는 밴드’임을 청각적·시각적으로 설명
-- **구성 요소**:
-  - **시그니처 사운드 3요소 카드**:
-    1. *온기 있는 보컬 & 프레이징*: 과장된 고음 기교보다 진정성과 여운으로 파고드는 프랭키 베벌리의 보컬
-    2. *콩가(Conga) & 느긋한 그루브*: 자극적인 비트 대신 몸을 맡기게 되는 퍼커션과 베이스라인
-    3. *콜 앤 리스폰스(Call & Response)*: 무대와 올화이트 관객이 한목소리로 완성하는 라이브 호흡
-  - **리듬 비주얼라이저**: 현재 오디오 재생 상태에 반응해 물결치는 웜 골드/앰버 이퀄라이저 바(재생 중일 때 활성, 정지 시 대기 웨이브)
-  - **공식 라이브 영상 Embed**: YouTube(`youtube-nocookie.com`) 공식 라이브 퍼포먼스 영상 1~2편 임베드 + *Live in Los Angeles*(1986), *Live in London*(1995/2003 DVD) 해설 카드
-
-#### ⑥ 나의 큐레이션 (Personal Liner Notes)
-- **목적**: 계획서 `나. 제작 목표`의 **‘개인적인 관점의 표현’**과 `추천` 섹션을 전시의 진정성 있는 클라이맥스로 구현
-- **구성 요소**:
-  - **큐레이터 노트(에세이)**: 소울·R&B 장르를 접한 뒤 거의 매일 들을 정도로 Maze에 빠지게 된 계기와 개인적 감상 (`src/data/curation.ts`에 분리하여 언제든 손쉽게 수정·확장 가능)
-  - **인터랙티브 ‘라이너 노트’ 카드 (4곡)**: 카드를 클릭/확장하면 작성자의 개인 감상평과 함께 **30초 미리듣기** 또는 **Spotify/YouTube 전체 곡 링크**를 바로 실행할 수 있다.
-    - **Pick 01 (최애곡 ★)**: `"Can't Get Over You"` (*Silky Soul*, 1989)
-    - **Pick 02 (최애곡 ★)**: `"We Are One"` (*We Are One*, 1983)
-    - **Pick 03 (입문 추천)**: `"Before I Let Go"` (*Live in New Orleans*, 1981)
-    - **Pick 04 (분위기 추천)**: `"Golden Time of Day"` (*Golden Time of Day*, 1978)
-
-#### ⑦ 엔딩 & 헌정 크레딧 (All-White 전환)
-- **목적**: 다시 순백의 올화이트 공간(`#FAF8F5`)으로 전환하며 여운 있는 마무리와 저작권/출처 고지 제공
-- **구성 요소**:
-  - 헌정 메시지: *In Loving Memory of Frankie Beverly (1946–2024)*
-  - 액션 버튼: `[ 처음(인트로)으로 돌아가기 ↑ ]` · `[ 바이닐 북 다시 펼쳐보기 ]`
-  - **비상업적 교육 과제 고지 & 멀티미디어 출처 크레딧 블록**
+4. **`RECOMMENDS` (`CurationSection.tsx`)**: 상단 굵은 NanumSquare Bold 개인 노트 + 하단 4곡(`Can't Get Over You`, `We Are One`, `Before I Let Go`, `Golden Time of Day`) `2×2` 대형 트랙 카드.
+5. **`LIVE` (`SoundLiveSection.tsx`)**: 공연장·연도·서술형 짜잘한 텍스트를 모두 제거한 깔끔한 YouTube 라이브 탭(`Live in London '95` / `Before I Let Go LA '86`) + 우측 시그니처 사운드 3요소 카드 + 하단 슬림 리듬 비주얼라이저.
+6. **`OUTRO` (`EndingSection.tsx`)**: 확대된 선셋 헌정 타이포(`In Loving Memory of Frankie Beverly`, `1946 — 2024`) + 액션 버튼 + `1px` 점선 3단 교육용 출처 푸터.
 
 ---
 
@@ -288,11 +162,16 @@ Public GitHub 저장소(`GustavoAndTaco/FrankieBeverly`) 및 Vercel 공개 웹 �
 
 ### 7.1 기술 스택 및 추가 패키지
 - **코어**: Next.js `16.4.6` (App Router, `src/`), React `19.3.0`, TypeScript, Tailwind CSS `4.3.3`
-- **추가 도입 예정 패키지**:
+- **UI 컴포넌트 시스템**: **shadcn/ui** (`components.json`, `src/lib/utils.ts`, `clsx`, `tailwind-merge`, `class-variance-authority`, `@radix-ui/react-slot`, `@radix-ui/react-tabs`, `@radix-ui/react-separator`, `@radix-ui/react-progress`)
+- **추가 도입 패키지 (모션·인터랙티브 그래픽 스택 포함)**:
   - `lucide-react`: 미니 플레이어, 책장 넘김 화살표, 사운드/외부 링크 아이콘
-  - `motion` (Framer Motion의 React 19 호환 최신 패키지): 3D 바이닐 북 플립, 슬리브에서 LP 꺼내기, 스크롤 섹션 전환 애니메이션
+  - `motion` (motion.dev): 3D 바이닐 북 플립, 슬리브에서 LP 꺼내기, 섹션 전환 및 마우스 제스처 애니메이션
+  - `gsap` · `@gsap/react` (gsap.com): ScrollTrigger 기반 스크롤 시네마틱, 타임라인·텍스트 정밀 타임라인 모션
+  - `@rive-app/react-canvas` (rive.app): 마우스·상태 머신 반응형 인터랙티브 캔버스 모션 (`.riv`)
+  - `@splinetool/react-spline` · `@splinetool/runtime` (spline.design): 3D 오브젝트/마우스 인터랙션 씬 연동 (`.splinecode`)
+  - `@lottiefiles/dotlottie-react` (lottiefiles.com): 경량 벡터 모션 그래픽 재생 (`.lottie` / `.json`)
 - **`next.config.ts` 설정 계획**:
-  - `images.remotePatterns`에 `is1-ssl.mzstatic.com`(iTunes 앨범 커버) 및 `upload.wikimedia.org`(Wikimedia CC 이미지) 등록
+  - `images.remotePatterns`에 `**.mzstatic.com`(iTunes 앨범 커버) 및 `upload.wikimedia.org`(Wikimedia CC 이미지) 등록
 
 ### 7.2 성능 최적화 전략 (9장 바이닐 북이 무거워지지 않는 설계)
 1. **온디맨드 단일 오디오 스트리밍 (`AudioPlayerContext`)**: 페이지 로드 시 9곡을 미리 받지 않고, 사용자가 특정 장에서 재생을 클릭할 때만 단 1개의 전역 `<audio>` 인스턴스에 `previewUrl`을 연결한다.
@@ -300,40 +179,54 @@ Public GitHub 저장소(`GustavoAndTaco/FrankieBeverly`) 및 Vercel 공개 웹 �
 3. **GPU 합성 레이어 모션**: 페이지 3D 플립과 LP 회전은 레이아웃 재계산(Reflow)을 유발하지 않는 `transform`(`rotateY`, `translate3d`, `rotate`)과 `opacity`만 사용한다.
 4. **접근성 배려**: OS의 `prefers-reduced-motion: reduce` 설정이 켜진 경우 과도한 3D 회전/플립 모션을 부드러운 페이드로 자동 완화한다.
 
-### 7.3 제안 디렉터리 구조 (`src/`)
+### 7.3 제안 디렉터리 구조 (`src/` & 루트 설정)
 
 ```text
+public/animations/menu-motion.json # 데스크톱 좌측 메뉴 모션 참고 에셋
+components.json                   # shadcn/ui (New York 스타일, Tailwind v4) 설정
 src/
+├── lib/
+│   └── utils.ts                  # cn() 클래스 병합 유틸리티 (clsx + tailwind-merge)
 ├── app/
 │   ├── api/
 │   │   └── itunes/
 │   │       └── route.ts          # Apple iTunes Search API 서버 프록시 & 캐시
-│   ├── globals.css               # 컬러 토큰, 그레인 오버레이, 바이닐/책장 유틸리티
-│   ├── layout.tsx                # Monoton, Cormorant Garamond, Noto Sans KR 폰트 & AudioProvider
-│   └── page.tsx                  # 7개 섹션 원페이지 스크롤리텔링 조립
+│   ├── fonts/                    # 로컬 나눔스퀘어 OTF (L/R/B/EB)
+│   ├── globals.css               # shadcn/ui 다크 토큰, 그레인, 3D 바이닐/볼륨 슬라이더 스타일
+│   ├── layout.tsx                # Monoton, Cormorant Garamond, NanumSquare, JetBrains Mono & AudioProvider
+│   └── page.tsx                  # 6개 스택 카드 섹션 조립
 ├── context/
-│   └── AudioPlayerContext.tsx    # 전역 단일 <audio> 제어, 진행률, 현재 재생 트랙 상태
+│   └── AudioPlayerContext.tsx    # 전역 단일 <audio> 제어, 진행률, 볼륨 조절, 현재 재생 트랙 상태
 ├── data/
-│   ├── albums.ts                 # 1977~1993 9장 바이닐 북 데이터 (트랙리스트, 대표곡, 해설)
-│   ├── timeline.ts               # 5단계 시대별 타임라인 데이터 (1960s~2024+)
-│   ├── curation.ts               # 작성자 에세이 & 최애곡/추천곡 라이너 노트 데이터
-│   └── media.ts                  # YouTube 라이브 영상 ID, Wikimedia CC 이미지 출처 메타데이터
+│   ├── albums.ts                 # 1977~1993 9장 바이닐 셀렉터 데이터
+│   ├── timeline.ts               # 4단계 굵직한 시대별 타임라인 데이터 (S1~S4, 2×2 벤토 그리드)
+│   ├── curation.ts               # 작성자 짧은 노트 & 최애곡/추천곡 2×2 라이너 노트 데이터
+│   └── media.ts                  # YouTube 라이브 영상 ID, 사운드 3요소, 교육 과제 고지
 └── components/
+    ├── ui/                       # shadcn/ui 공용 프리미티브
+    │   ├── badge.tsx
+    │   ├── button.tsx
+    │   ├── card.tsx
+    │   ├── progress.tsx
+    │   ├── separator.tsx
+    │   └── tabs.tsx
     ├── layout/
-    │   ├── StickyNav.tsx         # 섹션 추적 고정 미니 내비게이션
-    │   └── MiniPlayer.tsx        # 하단 플로팅 미니 바이닐 플레이어
+    │   ├── LeftRadialMenu.tsx    # 화면 좌측 고정 6대메뉴 곡선 롤링 내비게이션
+    │   └── MiniPlayer.tsx        # 하단 플로팅 미니 바이닐 플레이어 (+ 음량 조절 슬라이더)
+    ├── motion/                   # Next.js 16 SSR 안전 모션 그래픽 · 카드 스택 래퍼
+    │   ├── SectionCard.tsx       # GSAP ScrollTrigger 기반 스택 카드 + 선셋 그라데이션 커튼
+    │   ├── RiveCanvas.tsx        # Rive State Machine 인터랙티브 캔버스 래퍼
+    │   ├── SplineScene.tsx       # Spline 3D 씬 클라이언트 동적 래퍼
+    │   └── LottiePlayer.tsx      # DotLottie 벡터 모션 클라이언트 래퍼
     ├── sections/
-    │   ├── IntroSection.tsx      # ① Monoton 레트로 그라데이션 로고 히어로
-    │   ├── IdentitySection.tsx   # ② All-White 드라마틱 전환 & 정체성
-    │   ├── TimelineSection.tsx   # ③ 5단계 시대별 타임라인
-    │   ├── DiscographySection.tsx# ④ 바이닐 앤솔로지 북 래퍼
-    │   ├── SoundLiveSection.tsx  # ⑤ 사운드 특징, 비주얼라이저, YouTube 라이브
-    │   ├── CurationSection.tsx   # ⑥ 개인 에세이 & 라이너 노트 카드
-    │   └── EndingSection.tsx     # ⑦ All-White 헌정 엔딩 & 저작권 크레딧
+    │   ├── IntroSection.tsx      # ① 150% 확대 Monoton 선셋 로고 & 마우스 3D 패럴랙스
+    │   ├── TimelineSection.tsx   # ② ABOUT MAZE — 2×2 대형 벤토 타임라인 (S1~S4)
+    │   ├── DiscographySection.tsx# ③ DISCOGRAPHY — 3D 바이닐 셀렉터 래퍼
+    │   ├── CurationSection.tsx   # ④ RECOMMENDS — 개인 노트 + 2×2 대형 트랙 카드
+    │   ├── SoundLiveSection.tsx  # ⑤ LIVE — 깔끔한 YouTube 임베드 + 사운드 3요소 + 비주얼라이저
+    │   └── EndingSection.tsx     # ⑥ OUTRO — 선셋 헌정 클로징 + 1px 점선 3단 푸터
     └── vinyl-book/
-        ├── VinylBook.tsx         # 2면 스프레드 3D 플립 컨테이너 & 키보드/버튼 제어
-        ├── AlbumLeftPage.tsx     # 좌측: 커버, 레이블/연도, 해설, 트랙리스트
-        └── VinylRightPage.tsx    # 우측: 슬리브 포켓, LP 꺼내기/회전, 30초 재생 컨트롤
+        └── VinylSelector3D.tsx   # 마우스 반응형 9장 3D 비스듬한 셀렉터 + 상단 3D 회전 LP + 허공 설명
 ```
 
 ---
@@ -341,17 +234,16 @@ src/
 ## 8. 단계별 구현 로드맵 & 완료 기준 (Acceptance Criteria)
 
 ### 8.1 구현 마일스톤
-- **Phase 1 — 디자인 시스템 & 데이터 레이어 구축**: 컬러 토큰/폰트(`Monoton` 포함) 세팅, `src/data/*` 팩트 기반 데이터 작성, `/api/itunes` Route Handler 구현 및 커버·미리듣기 URL 검증
-- **Phase 2 — 상단 서사 섹션(①~③) & 내비게이션 구현**: 인트로 레트로 그라데이션 로고, 올화이트 전환 섹션 ②, 시대별 타임라인 섹션 ③, `StickyNav` 연동
-- **Phase 3 — 핵심 쇼케이스 ④ ‘바이닐 앤솔로지 북’ & 미니 플레이어**: 9장 3D 책장 넘김, LP 슬리브 출입/회전 애니메이션, `AudioPlayerContext` 및 하단 `MiniPlayer` 완성
-- **Phase 4 — 하단 서사 섹션(⑤~⑦) 완성**: 사운드 특징 & 리듬 비주얼라이저, YouTube 라이브 임베드, 나의 큐레이션 카드(`Can't Get Over You`, `We Are One` 강조), 헌정 엔딩 & 저작권 크레딧
-- **Phase 5 — 반응형·성능 검수 & Vercel 배포**: 모바일/데스크톱 크로스 체크, `npm run lint` & `npm run build` 통과, Vercel 프로덕션 배포 및 최종 발표 테스트
+- **Phase 1 — 디자인 시스템 & 모션·폰트 스택 구축**: shadcn/ui 초기화, 로컬 `NanumSquare` 폰트(`L/R/B/EB`) 연결, 5대 모션 그래픽 런타임(`motion`, `gsap`, `rive`, `spline`, `dotlottie`) 세팅, `/api/itunes` Route Handler 구현
+- **Phase 2 — 좌측 고정 메뉴 · GSAP 스택 커튼 · 6섹션 재구성**: 상단 바 및 Identity 제거, 좌측 고정 롤링 메뉴(`INTRO`~`OUTRO`) 구축, GSAP `ScrollTrigger` 기반 그라데이션 덮임 모션 적용, 전 섹션 내부 제목/짜잘한 부제 제거 및 가독성 확대
+- **Phase 3 — 3D 바이닐 셀렉터 & 볼륨 조절 미니 플레이어**: 9장 비스듬한 마우스 반응형 레코드 셀렉터 + 클릭 시 3D LP 상승 회전 + 허공 설명 플로팅, `MiniPlayer` 볼륨 슬라이더 구현
+- **Phase 4 — 검수 · 빌드 검증 & GitHub 푸시**: ESLint & Next.js 프로덕션 빌드 통과, 로컬 개발 서버 확인, 변경사항 커밋 및 `origin/main` 푸시
 
 ### 8.2 최종 완료 기준 (Checklist)
-- [ ] `npm run lint` 및 `npm run build`가 오류 없이 통과한다.
-- [ ] 인트로 메인 로고에 Google Fonts `Monoton`과 레트로 선셋 그라데이션이 선명하게 적용된다.
-- [ ] 섹션 ②와 ⑦에서 웜 다크 배경에서 올화이트(`#FAF8F5`)로의 시각적 전환이 자연스럽게 작동한다.
-- [ ] 바이닐 앤솔로지 북의 **9장 전체(1977~1993 정규 8장 + *Live in New Orleans* 1981)**를 넘길 수 있으며, *Silky Soul* 대표곡 `"Can't Get Over You"`와 *We Are One* 대표곡 `"We Are One"`을 포함해 9곡 모두 30초 미리듣기(또는 폴백 임베드)와 LP 회전 모션이 정상 동작한다.
-- [ ] 스크롤 이동 시에도 하단 플로팅 미니 플레이어가 재생 상태를 유지한다.
-- [ ] 상업 음원 파일이 리포지토리에 포함되지 않았으며, 엔딩 섹션에 비상업적 교육 과제 고지 및 이미지·음원·영상 출처가 빠짐없이 표기되어 있다.
-- [ ] Vercel 배포 URL에서 데스크톱 및 모바일 화면 모두 레이아웃 깨짐 없이 동작한다.
+- [x] `npm run lint` 및 `npm run build`가 오류 없이 통과한다.
+- [x] 좌측에 `INTRO`, `ABOUT MAZE`, `DISCOGRAPHY`, `RECOMMENDS`, `LIVE`, `OUTRO` 대문자 롤링 메뉴가 항상 고정되며 본문과 겹치지 않는다.
+- [x] 인트로 로고가 150% 확대된 `Monoton` 선셋 그라데이션으로 시선을 집중시킨다.
+- [x] 섹션 이동 시 다음 카드가 앞선 카드를 선셋 그라데이션 커튼으로 덮는 GSAP 스크롤 모션이 작동한다.
+- [x] 3D 바이닐 셀렉터에서 9장 앨범을 마우스로 탐색·클릭하면 3D LP가 위로 나와 회전하고 우측 허공에 설명이 떠오르며 재생된다.
+- [x] 하단 미니 플레이어에서 재생 제어와 음량 조절이 정상 동작한다.
+- [x] 상업 음원 파일이 리포지토리에 포함되지 않았으며, 엔딩 푸터에 비상업적 교육 과제 고지가 표기되어 있다.
